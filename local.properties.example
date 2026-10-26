@@ -1,0 +1,14 @@
+# Copy this file to local.properties and fill in your production identifiers.
+# local.properties is ignored by git and is never committed.
+
+# Google AdMob production identifiers.
+# Debug builds always use Google's official test identifiers instead.
+ADMOB_APP_ID=ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+ADMOB_INTERSTITIAL_GAME_START=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+
+# Google Play Billing product identifiers.
+BILLING_SUB_MONTHLY_ID=retrocade_premium_monthly
+BILLING_LIFETIME_ID=retrocade_premium_lifetime
+
+# Optional Android SDK location (normally written by Android Studio).
+# sdk.dir=/path/to/Android/Sdk
