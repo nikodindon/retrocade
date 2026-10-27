@@ -101,6 +101,7 @@ fun TetrisScreen(
 ) {
     val ui by session.uiState.collectAsStateWithLifecycle()
     val haptics = rememberHapticsController(ui.settings.hapticsEnabled)
+    val hapticsState by rememberUpdatedState(haptics)
     val density = LocalDensity.current
     val sfxState by rememberUpdatedState(sfxEnabled)
     val musicState by rememberUpdatedState(musicEnabled)
@@ -153,11 +154,11 @@ fun TetrisScreen(
                 is TetrisEvent.HardDropped,
                 is TetrisEvent.GameOver,
                 is TetrisEvent.LineCleared,
-                -> haptics.perform(HapticIntensity.STRONG)
+                -> hapticsState.perform(HapticIntensity.STRONG)
 
                 is TetrisEvent.Rotated,
                 is TetrisEvent.PieceLocked,
-                -> haptics.perform(HapticIntensity.LIGHT)
+                -> hapticsState.perform(HapticIntensity.LIGHT)
 
                 else -> Unit
             }
