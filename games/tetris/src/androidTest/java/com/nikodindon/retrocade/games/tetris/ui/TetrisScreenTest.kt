@@ -10,6 +10,7 @@ import com.nikodindon.retrocade.core.audio.AudioController
 import com.nikodindon.retrocade.core.audio.MusicTrack
 import com.nikodindon.retrocade.core.audio.Sfx
 import com.nikodindon.retrocade.core.ui.RetrocadeTheme
+import com.nikodindon.retrocade.games.api.GameScoreResult
 import com.nikodindon.retrocade.games.api.GameSettings
 import com.nikodindon.retrocade.games.tetris.TetrisSession
 import org.junit.Before
@@ -28,6 +29,10 @@ class TetrisScreenTest {
         override fun setSfxEnabled(enabled: Boolean) = Unit
 
         override fun setMusicEnabled(enabled: Boolean) = Unit
+
+        override fun setSfxVolume(volume: Float) = Unit
+
+        override fun setMusicVolume(volume: Float) = Unit
 
         override fun playMusic(track: MusicTrack) = Unit
 
@@ -56,7 +61,7 @@ class TetrisScreenTest {
                     onReplay = {},
                     onOpenPaywall = {},
                     onRecordScore = { score, lines, level ->
-                        TetrisScoreResult(isNewBest = false, best = score + lines + level, rank = null)
+                        GameScoreResult(isNewBest = false, best = score + lines + level, rank = null)
                     },
                 )
             }

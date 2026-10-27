@@ -51,10 +51,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -68,10 +66,13 @@ import com.nikodindon.retrocade.core.audio.Sfx
 import com.nikodindon.retrocade.core.common.ControlScheme
 import com.nikodindon.retrocade.core.engine.GameCanvas
 import com.nikodindon.retrocade.core.engine.rememberGameFrame
+import com.nikodindon.retrocade.core.ui.HapticIntensity
 import com.nikodindon.retrocade.core.ui.NeonPanel
 import com.nikodindon.retrocade.core.ui.PixelDivider
 import com.nikodindon.retrocade.core.ui.RetroColors
 import com.nikodindon.retrocade.core.ui.RetroButton
+import com.nikodindon.retrocade.core.ui.rememberHapticsController
+import com.nikodindon.retrocade.games.api.GameScoreResult
 import com.nikodindon.retrocade.games.api.GameStatus
 import com.nikodindon.retrocade.games.api.InputEvent
 import com.nikodindon.retrocade.games.tetris.TetrisSession
@@ -84,12 +85,6 @@ import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.min
 
-data class TetrisScoreResult(
-    val isNewBest: Boolean,
-    val best: Int,
-    val rank: Int?,
-)
-
 @Composable
 fun TetrisScreen(
     session: TetrisSession,
@@ -101,13 +96,13 @@ fun TetrisScreen(
     onExit: () -> Unit,
     onReplay: () -> Unit,
     onOpenPaywall: () -> Unit,
-    onRecordScore: suspend (score: Int, lines: Int, level: Int) -> TetrisScoreResult,
+    onRecordScore: suspend (score: Int, lines: Int, level: Int) -> GameScoreResult,
     modifier: Modifier = Modifier,
 ) {
     val ui by session.uiState.collectAsStateWithLifecycle()
-    val haptic = LocalHapticFeedback.current
+    val haptics = rememberHapticsController(ui.settings.hapticsEnabled)
+    val hapticsState by rememberUpdatedState(haptics)
     val density = LocalDensity.current
-    val hapticState by rememberUpdatedState(ui.settings.hapticsEnabled)
     val sfxState by rememberUpdatedState(sfxEnabled)
     val musicState by rememberUpdatedState(musicEnabled)
     val recordCallback by rememberUpdatedState(onRecordScore)
@@ -118,7 +113,7 @@ fun TetrisScreen(
     val isOver = status is GameStatus.GameOver
     val frame = rememberGameFrame(session = session, running = isPlaying)
 
-    var scoreResult by remember(session) { mutableStateOf<TetrisScoreResult?>(null) }
+    var scoreResult by remember(session) { mutableStateOf<GameScoreResult?>(null) }
     LaunchedEffect(session, status) {
         if (status is GameStatus.GameOver && scoreResult == null) {
             scoreResult = runCatching {
@@ -155,19 +150,17 @@ fun TetrisScreen(
             if (sfxState) {
                 sfxFor(event)?.let(audio::play)
             }
-            if (hapticState) {
-                when (event) {
-                    is TetrisEvent.HardDropped,
-                    is TetrisEvent.GameOver,
-                    is TetrisEvent.LineCleared,
-                    -> haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            when (event) {
+                is TetrisEvent.HardDropped,
+                is TetrisEvent.GameOver,
+                is TetrisEvent.LineCleared,
+                -> hapticsState.perform(HapticIntensity.STRONG)
 
-                    is TetrisEvent.Rotated,
-                    is TetrisEvent.PieceLocked,
-                    -> haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                is TetrisEvent.Rotated,
+                is TetrisEvent.PieceLocked,
+                -> hapticsState.perform(HapticIntensity.LIGHT)
 
-                    else -> Unit
-                }
+                else -> Unit
             }
         }
     }
@@ -693,7 +686,7 @@ private fun GameOverOverlay(
     lines: Int,
     level: Int,
     bestScore: Int,
-    result: TetrisScoreResult?,
+    result: GameScoreResult?,
     onReplay: () -> Unit,
     onExit: () -> Unit,
     onOpenPaywall: () -> Unit,

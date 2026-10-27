@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.nikodindon.retrocade.core.billing.BillingRepository
 import com.nikodindon.retrocade.core.billing.PremiumState
 import com.nikodindon.retrocade.core.common.ControlScheme
+import com.nikodindon.retrocade.core.common.GestureSensitivity
 import com.nikodindon.retrocade.core.storage.AppSettings
+import com.nikodindon.retrocade.core.storage.ScoreRepository
 import com.nikodindon.retrocade.core.storage.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    private val scoreRepository: ScoreRepository,
     private val billingRepository: BillingRepository,
 ) : ViewModel() {
     val settings: StateFlow<AppSettings> = settingsRepository.settings.stateIn(
@@ -33,12 +36,23 @@ class SettingsViewModel @Inject constructor(
     var restoreMessage by mutableStateOf<String?>(null)
         private set
 
+    var scoresMessage by mutableStateOf<String?>(null)
+        private set
+
     fun setMusicEnabled(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.setMusicEnabled(enabled) }
     }
 
     fun setSfxEnabled(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.setSfxEnabled(enabled) }
+    }
+
+    fun setMusicVolume(volume: Int) {
+        viewModelScope.launch { settingsRepository.setMusicVolume(volume) }
+    }
+
+    fun setSfxVolume(volume: Int) {
+        viewModelScope.launch { settingsRepository.setSfxVolume(volume) }
     }
 
     fun setHapticsEnabled(enabled: Boolean) {
@@ -53,14 +67,21 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setControlScheme(scheme) }
     }
 
-    fun setSwipeSensitivity(value: Float) {
-        viewModelScope.launch { settingsRepository.setSwipeSensitivity(value) }
+    fun setGestureSensitivity(sensitivity: GestureSensitivity) {
+        viewModelScope.launch { settingsRepository.setGestureSensitivity(sensitivity) }
     }
 
     fun restorePurchases() {
         viewModelScope.launch {
             billingRepository.refreshPurchases()
             restoreMessage = "Achats vérifiés auprès de Google Play."
+        }
+    }
+
+    fun resetScores() {
+        viewModelScope.launch {
+            scoreRepository.reset()
+            scoresMessage = "Scores locaux effacés."
         }
     }
 }

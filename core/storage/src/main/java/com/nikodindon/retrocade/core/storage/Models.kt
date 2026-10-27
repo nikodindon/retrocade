@@ -1,19 +1,36 @@
 package com.nikodindon.retrocade.core.storage
 
 import com.nikodindon.retrocade.core.common.ControlScheme
+import com.nikodindon.retrocade.core.common.GestureSensitivity
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class AppSettings(
     val sfxEnabled: Boolean = true,
     val musicEnabled: Boolean = true,
+    /** 0..100, persisted as a percentage. */
+    val sfxVolume: Int = 75,
+    /** 0..100, persisted as a percentage. */
+    val musicVolume: Int = 60,
     val hapticsEnabled: Boolean = true,
     val controlScheme: String = ControlScheme.TAP.name,
+    /** Stable name of a [GestureSensitivity]. Empty means "migrate from swipeSensitivity". */
+    val gestureSensitivity: String = "",
+    /** v0.1 field kept for migration when gestureSensitivity is absent. */
     val swipeSensitivity: Float = 0.5f,
     val showHoldButton: Boolean = true,
+    /** Set once the first-run tour has been completed or skipped. */
+    val onboardingDone: Boolean = false,
 ) {
     val controls: ControlScheme
         get() = ControlScheme.fromStorage(controlScheme)
+
+    val gestures: GestureSensitivity
+        get() = if (gestureSensitivity.isBlank()) {
+            GestureSensitivity.fromLegacySwipe(swipeSensitivity)
+        } else {
+            GestureSensitivity.fromStorage(gestureSensitivity)
+        }
 }
 
 @Serializable
@@ -28,7 +45,9 @@ data class ScoreEntry(
 data class GameScores(
     val best: Int = 0,
     val entries: List<ScoreEntry> = emptyList(),
-)
+) {
+    val hasPlayed: Boolean get() = entries.isNotEmpty()
+}
 
 @Serializable
 data class ScoreBook(

@@ -3,8 +3,8 @@ package com.nikodindon.retrocade.scores
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nikodindon.retrocade.core.storage.GameScores
-import com.nikodindon.retrocade.core.storage.ScoreBook
 import com.nikodindon.retrocade.core.storage.ScoreRepository
+import com.nikodindon.retrocade.games.api.GameRegistry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,14 +21,14 @@ data class GameScoreboard(
 
 @HiltViewModel
 class ScoresViewModel @Inject constructor(
-    games: Set<@JvmSuppressWildcards com.nikodindon.retrocade.games.api.Game>,
+    registry: GameRegistry,
     scoreRepository: ScoreRepository,
 ) : ViewModel() {
-    private val gamesById = games.associateBy { it.meta.id }
-    private val gameOrder = games.sortedBy { it.meta.name }.map { it.meta.id }
+    private val gamesById = registry.all.associateBy { it.meta.id }
+    private val gameOrder = registry.all.map { it.meta.id }
 
     val boards: StateFlow<List<GameScoreboard>> = scoreRepository.scores
-        .map { book: ScoreBook ->
+        .map { book ->
             gameOrder.map { id ->
                 val meta = gamesById.getValue(id).meta
                 GameScoreboard(

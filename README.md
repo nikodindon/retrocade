@@ -23,13 +23,15 @@ Tous les graphismes sont dessinés par code et tous les sons sont synthétisés 
 
 ## Fonctionnalités
 
-- **Hub de jeux** : catalogue évolutif, un jeu par carte, avec le meilleur score local.
+- **Hub de jeux piloté par un registre** : les cartes viennent de `GameRegistry` (Hilt multibinding), avec icône procédurale, description courte, meilleur score local ou « Pas encore joué ». États de chargement, catalogue vide et route inconnue gérés proprement.
+- **Route générique `game/{gameId}`** : le hub et la navigation ne connaissent aucun jeu concret ; une route inconnue affiche un écran d'erreur au lieu de planter.
+- **Onboarding** : trois pages à la première ouverture, bouton « Passer » sur chaque page, drapeau persisté et aucune publicité pendant ou juste après la découverte.
 - **Tetris** (v0.1) : rotation SRS et wall kicks, hold, file de 3 pièces, fantôme, gravité par niveau, lock delay, DAS/ARR, scoring, combos et back-to-back.
 - **Graphismes procéduraux** : blocs biseautés, particules, fonds CRT et glitch de game over dessinés en Canvas.
-- **Audio procédural** : effets sonores et musique chiptune générés par synthèse PCM (ondes carrées, triangle, enveloppes ADSR).
-- **Scores locaux** : meilleur score et top 10 par jeu, persistés en DataStore.
-- **Paramètres** : musique, effets, vibrations, schéma de contrôle, bouton hold et sensibilité des gestes.
-- **Contrôles tactiles** : tap pour tourner, glissement horizontal, glissement vers le bas, swipe vers le haut pour le hard drop, deux doigts pour le hold ; pavé de boutons optionnel.
+- **Audio procédural** : effets sonores et musique chiptune générés par synthèse PCM (ondes carrées, triangle, enveloppes ADSR), avec volumes globaux.
+- **Scores locaux** : meilleur score et top 10 séparés par jeu, persistés en DataStore JSON et migrés depuis la v0.1. Aucun classement en ligne.
+- **Paramètres complets** : musique et effets (interrupteurs + volumes 0–100 %), vibrations, schéma tactile ou boutons, sensibilité des gestes à trois niveaux, bouton hold, restauration des achats et remise à zéro des scores avec confirmation.
+- **Contrôles tactiles** : tap pour tourner, glissement horizontal, glissement vers le bas, swipe vers le haut pour le hard drop, deux doigts pour le hold ; pavé de boutons global optionnel.
 - **Paywall** : offres Google Play, restauration des achats, statut Premium affiché dans l'application.
 
 ## Monétisation
@@ -67,9 +69,20 @@ Règles appliquées par `AdPolicy` :
 1. **Zéro asset binaire pour les graphismes et les sons.** Tout est généré à l'exécution.
 2. **Moteur maison minimal**, partagé entre les jeux : boucle à pas fixe de 16 ms, rendu Canvas, entrées, audio.
 3. **Logique de jeu en Kotlin pur**, sans dépendance Android, pour des tests JVM rapides et déterministes.
-4. **Un jeu = un module isolé** qui implémente l'interface `Game`. Ajouter un jeu ne touche ni au moteur ni au hub.
-5. **Monétisation découplée** : le jeu ne connaît ni AdMob ni Billing ; il demande seulement à `AdPolicy` s'il doit afficher une publicité au lancement.
-6. **Décisions documentées** : chaque choix structurant fait l'objet d'un ADR dans `docs/adr/`.
+4. **Un jeu = un module isolé** qui implémente `Game` et s'enregistre via Hilt (`@IntoSet`). `GameRegistry` résout le hub et la route générique ; ajouter un jeu ne touche ni au moteur, ni au hub, ni à la navigation.
+5. **Monétisation découplée** : le jeu ne connaît ni AdMob ni Billing ; la route générique interroge seulement `AdPolicy` au lancement.
+6. **Données locales d'abord** : réglages, scores, onboarding et cache Premium vivent dans DataStore ; aucun compte ni serveur n'est requis.
+7. **Décisions documentées** : chaque choix structurant fait l'objet d'un ADR dans `docs/adr/`.
+
+### Ajouter un jeu
+
+1. Créer `games/<nom>/` avec son `build.gradle.kts`, son manifeste, son implémentation de `Game` (logique, écran Compose et métadonnées) et sa liaison Hilt `@Provides @IntoSet`.
+2. Ajouter `implementation(project(":games:<nom>"))` dans `app/build.gradle.kts`.
+3. C'est tout : `settings.gradle.kts` découvre automatiquement les modules `games/*`, le registre les trie, le hub les affiche et la route `game/<id>` fonctionne.
+
+L'auto-découverte n'inclut que les dossiers qui contiennent un `build.gradle.kts` ; un dossier vide ou de ressources sous `games/` est ignoré. Un module avec un build valide mais une configuration cassée échouera évidemment au build Gradle.
+
+Les scores, l'écran de scores, les paramètres, la publicité et les achats sont fournis par la couche commune.
 
 ## Structure du projet
 
@@ -79,11 +92,12 @@ retrocade/
 │   └── src/main/java/com/nikodindon/retrocade/
 │       ├── RetrocadeApplication.kt   # Application, initialisation du billing
 │       ├── MainActivity.kt           # Point d'entrée, initialisation UMP/AdMob
-│       ├── game/                     # Route et ViewModel de Tetris
-│       ├── hub/                      # Catalogue de jeux, accueil
+│       ├── game/                     # Route générique game/{gameId} et ViewModel
+│       ├── hub/                      # Catalogue alimenté par GameRegistry
+│       ├── onboarding/               # Découverte de première ouverture
 │       ├── paywall/                  # Offres Premium et restauration
-│       ├── scores/                   # Top 10 local
-│       ├── settings/                 # Audio, vibrations, contrôles
+│       ├── scores/                   # Top 10 local, tous les jeux
+│       ├── settings/                 # Audio, contrôles, données, achats
 │       └── navigation/
 ├── core/
 │   ├── common/                       # Rng SplitMix64, contrôles, helpers
@@ -94,7 +108,7 @@ retrocade/
 │   ├── billing/                      # Play Billing, abonnement, achat à vie
 │   └── storage/                      # DataStore : scores, préférences, cache Premium
 ├── games/
-│   ├── api/                          # Contrat Game, GameMeta, GameSettings
+│   ├── api/                          # Contrat Game, GameMeta, GameSettings, GameRegistry
 │   └── tetris/
 │       ├── logic/                    # Plateau, pièces, SRS, scoring (Kotlin pur)
 │       ├── procedural/               # Palettes, particules, rendu Canvas
@@ -162,32 +176,36 @@ Les builds release sont bloqués par la tâche `verifyReleaseAdIds` si un identi
 ./gradlew assembleDebug
 
 # Tests instrumentés Compose sur un appareil/émulateur connecté
+./gradlew :app:connectedDebugAndroidTest
 ./gradlew :games:tetris:connectedDebugAndroidTest
 
 # Vérifier le garde-fou release (échoue sans identifiants de production)
 ./gradlew assembleRelease
 ```
 
-La CI exécute `testDebugUnitTest`, `lintDebug` et `assembleDebug` sur chaque push et chaque pull request.
+La CI exécute `testDebugUnitTest`, `lintDebug` et `assembleDebug` sur chaque push et chaque pull request. Les tests instrumentés Compose (`:app` et `:games:tetris`) sont actuellement lancés localement sur appareil/émulateur ; un job CI avec émulateur est prévu en v0.6 avant la publication.
 
 ## Roadmap
 
 | Version | Objectif | Contenu principal | Statut |
 |---|---|---|---|
 | **v0.1.0** | Fondations + Tetris | Moteur, Tetris complet et procédural, hub, paramètres, scores locaux, paywall, AdMob interstitiel, UMP, billing mensuel et à vie | ✅ Livré |
-| **v0.2.0** | Astéroïdes | Vaisseau à physique vectorielle, astéroïdes procéduraux qui se fragmentent, ovnis | ⏳ Prévu |
-| **v0.3.0** | Arkanoid | Briques procédurales, balle et raquette, power-ups | ⏳ Prévu |
-| **v0.4.0** | Catalogue étendu | Snake, Space Invaders, Pong, Breakout-like, Pac-like | ⏳ Prévu |
-| **v0.5.0** | Qualité | Couverture de tests, performances (60 fps stables), accessibilité, localisation FR/EN | ⏳ Prévu |
-| **v1.0.0** | Publication | Release production sur le Play Store, politique de confidentialité, Data Safety, vérification serveur des achats | ⏳ Prévu |
+| **v0.2.0** | Hub générique + réglages complets | Registre Hilt et route `game/{gameId}`, hub piloté par les données, onboarding, volumes, trois sensibilités, abstraction haptique, remise à zéro des scores, migration v0.1 et tests multi-jeux | ✅ Livré |
+| **v0.3.0** | Astéroïdes | Vaisseau à physique vectorielle, astéroïdes procéduraux qui se fragmentent, ovnis | ⏳ Prévu |
+| **v0.4.0** | Arkanoid | Briques procédurales, balle et raquette, power-ups | ⏳ Prévu |
+| **v0.5.0** | Catalogue étendu | Snake, Space Invaders, Pong, Breakout-like, Pac-like | ⏳ Prévu |
+| **v0.6.0** | Qualité | Couverture de tests, performances (60 fps stables), accessibilité, localisation FR/EN, job CI instrumenté sur émulateur | ⏳ Prévu |
+| **v1.0.0** | Publication | Release production sur le Play Store, politique de confidentialité, Data Safety, vérification serveur des achats, audit du targetSdk | ⏳ Prévu |
 | **Après 1.0** | Vie du jeu | Classements et succès (Play Games Services), thèmes CRT, mise à jour du catalogue à distance (Remote Config), jeux saisonniers | 💡 Idées |
 
-### Limites connues de la v0.1.0
+### Limites connues de la v0.2.0
 
+- **Scores strictement locaux** : le « meilleur score » du hub et l'écran de scores concernent l'appareil ; aucun classement en ligne ni Play Games Services n'est inclus.
 - **T-spin non implémenté** : les rotations et wall kicks SRS sont complets, mais le bonus T-spin est volontairement reporté (ADR 0004).
-- **Vérification des achats côté client uniquement** : pas de backend en v0.1 ; un appareil compromis pourrait contourner le paywall (ADR 0005).
-- **Une langue** : interface en français ; la localisation FR/EN est prévue en v0.5.
-- **Un seul jeu** : Tetris est le jeu de référence ; les suivants arriveront au fil des versions.
+- **Vérification des achats côté client uniquement** : pas de backend en v0.2 ; un appareil compromis pourrait contourner le paywall (ADR 0005).
+- **Une langue** : interface en français ; la localisation FR/EN reste prévue après la v0.2.
+- **Un seul jeu** : Tetris est le jeu de référence ; le registre et la route générique sont prêts pour les suivants.
+- **targetSdk 35 conservé** : aucune modification dans cette version ; la conformité Play sera auditée avant la v1.0 ([issue #2](https://github.com/nikodindon/retrocade/issues/2)).
 
 ## Workflow de contribution
 

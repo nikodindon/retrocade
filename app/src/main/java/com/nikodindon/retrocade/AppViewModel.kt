@@ -14,21 +14,34 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
-    settingsRepository: SettingsRepository,
+    private val settingsRepository: SettingsRepository,
     private val audio: AudioController,
 ) : ViewModel() {
-    val settings: StateFlow<AppSettings> = settingsRepository.settings.stateIn(
+    /**
+     * Null until DataStore has produced its first value. Navigation waits for this
+     * so an existing user never sees the onboarding for one frame.
+     */
+    val settings: StateFlow<AppSettings?> = settingsRepository.settings.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = AppSettings(),
+        initialValue = null,
     )
 
     init {
         viewModelScope.launch {
-            settings.collect {
-                audio.setSfxEnabled(it.sfxEnabled)
-                audio.setMusicEnabled(it.musicEnabled)
+            settings.collect { current ->
+                if (current == null) return@collect
+                audio.setSfxEnabled(current.sfxEnabled)
+                audio.setMusicEnabled(current.musicEnabled)
+                audio.setSfxVolume(current.sfxVolume / 100f)
+                audio.setMusicVolume(current.musicVolume / 100f)
             }
+        }
+    }
+
+    fun completeOnboarding() {
+        viewModelScope.launch {
+            settingsRepository.setOnboardingDone(true)
         }
     }
 }

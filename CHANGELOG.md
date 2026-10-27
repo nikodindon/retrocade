@@ -6,6 +6,43 @@ versionnage sémantique.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-10-27
+
+### Ajouté
+
+- Registre `GameRegistry` alimenté par Hilt multibinding (`@IntoSet`) et route
+  générique `game/{gameId}` ; les jeux exposent désormais leur propre écran Compose.
+- Hub piloté par le registre : icône procédurale, description, meilleur score local
+  ou « Pas encore joué », états de chargement et catalogue vide.
+- Écran d'erreur propre pour une route de jeu inconnue.
+- Onboarding de trois pages à la première ouverture, bouton « Passer » sur chaque
+  page et drapeau persisté en DataStore.
+- Paramètres complets : volumes musique/SFX (0–100 %), trois niveaux de sensibilité
+  des gestes, vibrations via une abstraction dédiée et bouton hold.
+- Remise à zéro des scores avec boîte de confirmation.
+- Migration des réglages et des scores v0.1, y compris l'ancien curseur de
+  sensibilité.
+- Tests JVM du registre, des identifiants uniques, de la route inconnue, des
+  réglages (défauts, persistance, bornes), du drapeau d'onboarding et des scores
+  multi-jeux ; tests Compose du hub, des paramètres, de l'onboarding et de l'écran
+  « jeu introuvable ».
+- ADR 0007 (registre et route générique), 0008 (paramètres et scores locaux),
+  0009 (onboarding et publicité).
+
+### Modifié
+
+- La navigation ne référence plus Tetris : `TetrisRoute` et son ViewModel sont
+  supprimés au profit de la route générique.
+- `settings.gradle.kts` découvre automatiquement les modules `games/*`.
+- Version de l'application portée à `0.2.0` (`versionCode` 2).
+- Le README décrit le hub générique, l'onboarding, les scores strictement locaux et
+  la procédure d'ajout d'un jeu.
+
+### Corrigé
+
+- Un score v0.1 existant reste lisible après la mise à jour.
+- Les volumes hors bornes sont ramenés entre 0 et 100 avant persistance.
+
 ## [0.1.0] — 2026-10-26
 
 ### Ajouté
