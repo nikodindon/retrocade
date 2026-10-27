@@ -80,6 +80,8 @@ Règles appliquées par `AdPolicy` :
 2. Ajouter `implementation(project(":games:<nom>"))` dans `app/build.gradle.kts`.
 3. C'est tout : `settings.gradle.kts` découvre automatiquement les modules `games/*`, le registre les trie, le hub les affiche et la route `game/<id>` fonctionne.
 
+L'auto-découverte n'inclut que les dossiers qui contiennent un `build.gradle.kts` ; un dossier vide ou de ressources sous `games/` est ignoré. Un module avec un build valide mais une configuration cassée échouera évidemment au build Gradle.
+
 Les scores, l'écran de scores, les paramètres, la publicité et les achats sont fournis par la couche commune.
 
 ## Structure du projet
@@ -181,7 +183,7 @@ Les builds release sont bloqués par la tâche `verifyReleaseAdIds` si un identi
 ./gradlew assembleRelease
 ```
 
-La CI exécute `testDebugUnitTest`, `lintDebug` et `assembleDebug` sur chaque push et chaque pull request.
+La CI exécute `testDebugUnitTest`, `lintDebug` et `assembleDebug` sur chaque push et chaque pull request. Les tests instrumentés Compose (`:app` et `:games:tetris`) sont actuellement lancés localement sur appareil/émulateur ; un job CI avec émulateur est prévu en v0.6 avant la publication.
 
 ## Roadmap
 
@@ -192,6 +194,7 @@ La CI exécute `testDebugUnitTest`, `lintDebug` et `assembleDebug` sur chaque pu
 | **v0.3.0** | Astéroïdes | Vaisseau à physique vectorielle, astéroïdes procéduraux qui se fragmentent, ovnis | ⏳ Prévu |
 | **v0.4.0** | Arkanoid | Briques procédurales, balle et raquette, power-ups | ⏳ Prévu |
 | **v0.5.0** | Catalogue étendu | Snake, Space Invaders, Pong, Breakout-like, Pac-like | ⏳ Prévu |
+| **v0.6.0** | Qualité | Couverture de tests, performances (60 fps stables), accessibilité, localisation FR/EN, job CI instrumenté sur émulateur | ⏳ Prévu |
 | **v1.0.0** | Publication | Release production sur le Play Store, politique de confidentialité, Data Safety, vérification serveur des achats, audit du targetSdk | ⏳ Prévu |
 | **Après 1.0** | Vie du jeu | Classements et succès (Play Games Services), thèmes CRT, mise à jour du catalogue à distance (Remote Config), jeux saisonniers | 💡 Idées |
 
