@@ -33,8 +33,8 @@ android {
         applicationId = "com.nikodindon.retrocade"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -140,6 +140,7 @@ dependencies {
     implementation(project(":core:storage"))
     implementation(project(":games:api"))
     implementation(project(":games:tetris"))
+    implementation(project(":games:asteroids"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
