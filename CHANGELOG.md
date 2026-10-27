@@ -6,6 +6,52 @@ versionnage sémantique.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-27
+
+### Ajouté
+
+- Module autonome `games/asteroids` et liaison Hilt `@IntoSet` : le hub et la
+  route générique découvrent Astéroïdes sans modification du hub, de la
+  navigation ni du moteur.
+- Monde torique de 1 000 × 1 000 unités, vaisseau à inertie avec poussée,
+  friction, rotation et vitesse plafonnée, respawn au centre avec invulnérabilité
+  temporaire.
+- Astéroïdes procéduraux irréguliers en trois tailles : 20, 50 et 100 points,
+  fragmentation déterministe en deux ou trois morceaux, formes et couleurs issues
+  de la graine.
+- Soucoupes qui apparaissent plus souvent et tirent plus vite avec les vagues,
+  projectiles ennemis, collision et score de 200 points.
+- Vagues progressives plafonnées à 20 astéroïdes, trois vies, une vie bonus tous
+  les 10 000 points dans la limite de cinq vies, fin de partie à zéro vie.
+- HUD complet (score, meilleur score local, vies, vague, pause), écran de pause,
+  écran de fin avec score, vague, nouveau record, rejouer et menu.
+- Contrôles tactiles multi-touch (gauche/droite pour tourner, bas pour pousser,
+  haut pour tirer) et pavé de boutons sous le terrain pour le mode boutons.
+- Aide transparente affichée au premier lancement du jeu, mémorisée localement.
+- Rendu procédural : étoiles générées une fois, scintillement léger, formes
+  vectorielles, traînées, particules poolées sans gravité et flash d'impact.
+- Sons et musique synthétisés pour le tir, la poussée, les explosions, les
+  soucoupes, les vies bonus, les vagues et la fin de partie.
+- Tests JVM du monde torique, des collisions aux bords, de la fragmentation, des
+  projectiles, de l'invulnérabilité, des vagues, du scoring, des vies bonus, de la
+  fin de partie et du déterminisme à graine égale.
+- Tests Compose du HUD, de la pause/reprise et de l'aide au premier lancement.
+- ADR 0010 (monde torique et collisions), 0011 (formes et rendu procédural),
+  0012 (contrôles et aide) et 0013 (vagues, scoring et contrat de scores).
+
+### Modifié
+
+- Version de l'application portée à `0.3.0` (`versionCode` 3).
+- `app/build.gradle.kts` déclare le module `:games:asteroids`.
+- Le README documente Astéroïdes, ses contrôles, ses tests et ses limites.
+
+### Vérifié
+
+- `./gradlew test lintDebug assembleDebug` passe.
+- Tests instrumentés Tetris et Astéroïdes passés sur un appareil Android 15.
+- Stress test avec 20 astéroïdes à l'écran sur un écran 90 Hz : 549 frames
+  rendues en 6 s, 0,55 % de frames janky, 99e percentile à 34 ms.
+
 ## [0.2.0] — 2026-10-27
 
 ### Ajouté

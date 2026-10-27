@@ -27,11 +27,13 @@ Tous les graphismes sont dessinés par code et tous les sons sont synthétisés 
 - **Route générique `game/{gameId}`** : le hub et la navigation ne connaissent aucun jeu concret ; une route inconnue affiche un écran d'erreur au lieu de planter.
 - **Onboarding** : trois pages à la première ouverture, bouton « Passer » sur chaque page, drapeau persisté et aucune publicité pendant ou juste après la découverte.
 - **Tetris** (v0.1) : rotation SRS et wall kicks, hold, file de 3 pièces, fantôme, gravité par niveau, lock delay, DAS/ARR, scoring, combos et back-to-back.
+- **Astéroïdes** (v0.3) : monde torique, vaisseau à inertie, trois tailles d'astéroïdes qui se fragmentent, soucoupes qui tirent et s'intensifient avec les vagues, vies, bonus et score local.
 - **Graphismes procéduraux** : blocs biseautés, particules, fonds CRT et glitch de game over dessinés en Canvas.
 - **Audio procédural** : effets sonores et musique chiptune générés par synthèse PCM (ondes carrées, triangle, enveloppes ADSR), avec volumes globaux.
 - **Scores locaux** : meilleur score et top 10 séparés par jeu, persistés en DataStore JSON et migrés depuis la v0.1. Aucun classement en ligne.
 - **Paramètres complets** : musique et effets (interrupteurs + volumes 0–100 %), vibrations, schéma tactile ou boutons, sensibilité des gestes à trois niveaux, bouton hold, restauration des achats et remise à zéro des scores avec confirmation.
 - **Contrôles tactiles** : tap pour tourner, glissement horizontal, glissement vers le bas, swipe vers le haut pour le hard drop, deux doigts pour le hold ; pavé de boutons global optionnel.
+- **Contrôles Astéroïdes** : zones tactiles gauche/droite pour tourner, bas pour pousser, haut pour tirer, ou pavé de boutons sous le terrain ; aide transparente au premier lancement.
 - **Paywall** : offres Google Play, restauration des achats, statut Premium affiché dans l'application.
 
 ## Monétisation
@@ -109,6 +111,12 @@ retrocade/
 │   └── storage/                      # DataStore : scores, préférences, cache Premium
 ├── games/
 │   ├── api/                          # Contrat Game, GameMeta, GameSettings, GameRegistry
+│   ├── asteroids/
+│   │   ├── logic/                    # Monde torique, entités, vagues, scoring (Kotlin pur)
+│   │   ├── procedural/               # Formes, étoiles, particules, rendu Canvas
+│   │   ├── audio/                    # Sons et musique Astéroïdes
+│   │   ├── ui/                       # HUD, aide, zones tactiles, pavé de boutons
+│   │   └── src/test/                 # Tests JVM du moteur déterministe
 │   └── tetris/
 │       ├── logic/                    # Plateau, pièces, SRS, scoring (Kotlin pur)
 │       ├── procedural/               # Palettes, particules, rendu Canvas
@@ -166,7 +174,7 @@ Les builds release sont bloqués par la tâche `verifyReleaseAdIds` si un identi
 ## Build, tests et vérifications
 
 ```bash
-# Tests unitaires JVM (logique Tetris, moteur, audio, stockage, billing, ads)
+# Tests unitaires JVM (logique Tetris et Astéroïdes, moteur, audio, stockage, billing, ads)
 ./gradlew test
 
 # Analyse statique Android
@@ -178,12 +186,13 @@ Les builds release sont bloqués par la tâche `verifyReleaseAdIds` si un identi
 # Tests instrumentés Compose sur un appareil/émulateur connecté
 ./gradlew :app:connectedDebugAndroidTest
 ./gradlew :games:tetris:connectedDebugAndroidTest
+./gradlew :games:asteroids:connectedDebugAndroidTest
 
 # Vérifier le garde-fou release (échoue sans identifiants de production)
 ./gradlew assembleRelease
 ```
 
-La CI exécute `testDebugUnitTest`, `lintDebug` et `assembleDebug` sur chaque push et chaque pull request. Les tests instrumentés Compose (`:app` et `:games:tetris`) sont actuellement lancés localement sur appareil/émulateur ; un job CI avec émulateur est prévu en v0.6 avant la publication.
+La CI exécute `testDebugUnitTest`, `lintDebug` et `assembleDebug` sur chaque push et chaque pull request. Les tests instrumentés Compose (`:app`, `:games:tetris` et `:games:asteroids`) sont actuellement lancés localement sur appareil/émulateur ; un job CI avec émulateur est prévu en v0.6 avant la publication.
 
 ## Roadmap
 
@@ -191,20 +200,21 @@ La CI exécute `testDebugUnitTest`, `lintDebug` et `assembleDebug` sur chaque pu
 |---|---|---|---|
 | **v0.1.0** | Fondations + Tetris | Moteur, Tetris complet et procédural, hub, paramètres, scores locaux, paywall, AdMob interstitiel, UMP, billing mensuel et à vie | ✅ Livré |
 | **v0.2.0** | Hub générique + réglages complets | Registre Hilt et route `game/{gameId}`, hub piloté par les données, onboarding, volumes, trois sensibilités, abstraction haptique, remise à zéro des scores, migration v0.1 et tests multi-jeux | ✅ Livré |
-| **v0.3.0** | Astéroïdes | Vaisseau à physique vectorielle, astéroïdes procéduraux qui se fragmentent, ovnis | ⏳ Prévu |
+| **v0.3.0** | Astéroïdes | Monde torique, vaisseau à inertie, astéroïdes procéduraux fragmentables, soucoupes, vagues plafonnées, vies et bonus, contrôles tactiles/boutons, aide au premier lancement | ✅ Livré |
 | **v0.4.0** | Arkanoid | Briques procédurales, balle et raquette, power-ups | ⏳ Prévu |
 | **v0.5.0** | Catalogue étendu | Snake, Space Invaders, Pong, Breakout-like, Pac-like | ⏳ Prévu |
 | **v0.6.0** | Qualité | Couverture de tests, performances (60 fps stables), accessibilité, localisation FR/EN, job CI instrumenté sur émulateur | ⏳ Prévu |
 | **v1.0.0** | Publication | Release production sur le Play Store, politique de confidentialité, Data Safety, vérification serveur des achats, audit du targetSdk | ⏳ Prévu |
 | **Après 1.0** | Vie du jeu | Classements et succès (Play Games Services), thèmes CRT, mise à jour du catalogue à distance (Remote Config), jeux saisonniers | 💡 Idées |
 
-### Limites connues de la v0.2.0
+### Limites connues de la v0.3.0
 
 - **Scores strictement locaux** : le « meilleur score » du hub et l'écran de scores concernent l'appareil ; aucun classement en ligne ni Play Games Services n'est inclus.
 - **T-spin non implémenté** : les rotations et wall kicks SRS sont complets, mais le bonus T-spin est volontairement reporté (ADR 0004).
-- **Vérification des achats côté client uniquement** : pas de backend en v0.2 ; un appareil compromis pourrait contourner le paywall (ADR 0005).
-- **Une langue** : interface en français ; la localisation FR/EN reste prévue après la v0.2.
-- **Un seul jeu** : Tetris est le jeu de référence ; le registre et la route générique sont prêts pour les suivants.
+- **Vérification des achats côté client uniquement** : pas de backend en v0.3 ; un appareil compromis pourrait contourner le paywall (ADR 0005).
+- **Une langue** : interface en français ; la localisation FR/EN reste prévue après la v0.3.
+- **Écran de scores commun** : Astéroïdes n'a pas de lignes ; sa vague est stockée dans la colonne « niveau » de l'écran de scores, qui affiche donc « 0 lignes · NIV. N » (ADR 0013).
+- **Bandeau du hub** : le libellé `BUILD 0.2.0` est encore codé en dur dans le hub ; il n'a pas été modifié en v0.3 pour respecter le périmètre « module de jeu + `app/build.gradle.kts` ».
 - **targetSdk 35 conservé** : aucune modification dans cette version ; la conformité Play sera auditée avant la v1.0 ([issue #2](https://github.com/nikodindon/retrocade/issues/2)).
 
 ## Workflow de contribution
