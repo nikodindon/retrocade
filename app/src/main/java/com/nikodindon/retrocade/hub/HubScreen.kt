@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,32 +32,51 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nikodindon.retrocade.core.storage.ScoreBook
 import com.nikodindon.retrocade.core.ui.NeonPanel
 import com.nikodindon.retrocade.core.ui.PixelDivider
 import com.nikodindon.retrocade.core.ui.PixelIcon
 import com.nikodindon.retrocade.core.ui.RetroBackdrop
 import com.nikodindon.retrocade.core.ui.RetroButton
 import com.nikodindon.retrocade.core.ui.RetroColors
-import com.nikodindon.retrocade.games.api.Game
 import com.nikodindon.retrocade.ui.formatScore
 
 @Composable
 fun HubScreen(
-    onPlay: () -> Unit,
+    onGame: (String) -> Unit,
     onScores: () -> Unit,
     onSettings: () -> Unit,
     onStore: () -> Unit,
 ) {
     val viewModel: HubViewModel = hiltViewModel()
-    val scores by viewModel.scores.collectAsStateWithLifecycle()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val premium by viewModel.premium.collectAsStateWithLifecycle()
 
+    HubContent(
+        state = state,
+        premium = premium,
+        onGame = onGame,
+        onScores = onScores,
+        onSettings = onSettings,
+        onStore = onStore,
+    )
+}
+
+/** Stateless hub, also used by Compose tests with fake registry data. */
+@Composable
+fun HubContent(
+    state: HubUiState?,
+    premium: Boolean,
+    onGame: (String) -> Unit,
+    onScores: () -> Unit,
+    onSettings: () -> Unit,
+    onStore: () -> Unit,
+) {
     RetroBackdrop(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -75,7 +95,7 @@ fun HubScreen(
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = "ARCADE SYSTEM  ·  BUILD 0.1.0",
+                        text = "ARCADE SYSTEM  ·  BUILD 0.2.0",
                         style = MaterialTheme.typography.labelSmall,
                         color = RetroColors.TextMuted,
                     )
@@ -100,13 +120,17 @@ fun HubScreen(
                 color = RetroColors.NeonCyan,
             )
             Spacer(Modifier.height(8.dp))
-            viewModel.games.forEach { game ->
-                GameCard(
-                    game = game,
-                    best = scores.forGame(game.meta.id).best,
-                    onPlay = onPlay,
-                )
-                Spacer(Modifier.height(10.dp))
+
+            when {
+                state == null -> LoadingCatalog()
+                state.games.isEmpty() -> EmptyCatalog()
+                else -> state.games.forEach { entry ->
+                    GameCard(
+                        entry = entry,
+                        onPlay = { onGame(entry.game.meta.id) },
+                    )
+                    Spacer(Modifier.height(10.dp))
+                }
             }
 
             Spacer(Modifier.height(14.dp))
@@ -121,21 +145,12 @@ fun HubScreen(
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 RetroButton(
-                    label = "Jouer",
-                    onClick = onPlay,
-                    icon = Icons.Default.PlayArrow,
-                    modifier = Modifier.weight(1f),
-                )
-                RetroButton(
                     label = "Scores",
                     onClick = onScores,
                     accent = RetroColors.NeonCyan,
                     icon = Icons.Default.Star,
                     modifier = Modifier.weight(1f),
                 )
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 RetroButton(
                     label = "Paramètres",
                     onClick = onSettings,
@@ -143,14 +158,15 @@ fun HubScreen(
                     icon = Icons.Default.Settings,
                     modifier = Modifier.weight(1f),
                 )
-                RetroButton(
-                    label = "Boutique",
-                    onClick = onStore,
-                    accent = RetroColors.Amber,
-                    icon = Icons.Default.ShoppingCart,
-                    modifier = Modifier.weight(1f),
-                )
             }
+            Spacer(Modifier.height(8.dp))
+            RetroButton(
+                label = "Boutique",
+                onClick = onStore,
+                accent = RetroColors.Amber,
+                icon = Icons.Default.ShoppingCart,
+                modifier = Modifier.fillMaxWidth(),
+            )
 
             Spacer(Modifier.height(24.dp))
             Text(
@@ -174,6 +190,52 @@ fun HubScreen(
 }
 
 @Composable
+private fun LoadingCatalog() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 28.dp)
+            .testTag("hub_loading"),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CircularProgressIndicator(
+            color = RetroColors.NeonGreen,
+            modifier = Modifier.size(22.dp),
+        )
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = "CHARGEMENT DU CATALOGUE…",
+            style = MaterialTheme.typography.labelSmall,
+            color = RetroColors.TextMuted,
+        )
+    }
+}
+
+@Composable
+private fun EmptyCatalog() {
+    NeonPanel(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("hub_empty"),
+        accent = RetroColors.TextDim,
+    ) {
+        Column(Modifier.fillMaxWidth()) {
+            Text(
+                text = "AUCUN JEU INSTALLÉ",
+                style = MaterialTheme.typography.titleMedium,
+                color = RetroColors.TextPrimary,
+            )
+            Text(
+                text = "Ajoutez un module de jeu pour enrichir le catalogue.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = RetroColors.TextMuted,
+            )
+        }
+    }
+}
+
+@Composable
 private fun StatusBadge(premium: Boolean) {
     val color = if (premium) RetroColors.Amber else RetroColors.TextDim
     Box(
@@ -192,14 +254,15 @@ private fun StatusBadge(premium: Boolean) {
 
 @Composable
 private fun GameCard(
-    game: Game,
-    best: Int,
+    entry: HubGame,
     onPlay: () -> Unit,
 ) {
+    val game = entry.game
     val accent = Color(game.meta.accentColor)
     NeonPanel(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("hub_game_${game.meta.id}")
             .clickable(onClick = onPlay),
         accent = accent,
     ) {
@@ -239,10 +302,13 @@ private fun GameCard(
                     color = RetroColors.TextMuted,
                 )
                 Text(
-                    text = "MEILLEUR SCORE  ${formatScore(best)}",
+                    text = entry.best?.let { "MEILLEUR SCORE  ${formatScore(it)}" }
+                        ?: "PAS ENCORE JOUÉ",
                     style = MaterialTheme.typography.labelSmall,
-                    color = RetroColors.TextDim,
-                    modifier = Modifier.padding(top = 6.dp),
+                    color = if (entry.best == null) RetroColors.TextDim else accent,
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .testTag("hub_best_${game.meta.id}"),
                 )
             }
             Icon(

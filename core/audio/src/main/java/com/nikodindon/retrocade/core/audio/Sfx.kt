@@ -42,6 +42,12 @@ interface AudioController : SfxPlayer {
 
     fun setMusicEnabled(enabled: Boolean)
 
+    /** 0..1 linear volume. Out-of-range values are clamped by the implementation. */
+    fun setSfxVolume(volume: Float)
+
+    /** 0..1 linear volume. Out-of-range values are clamped by the implementation. */
+    fun setMusicVolume(volume: Float)
+
     fun playMusic(track: MusicTrack)
 
     fun stopMusic()

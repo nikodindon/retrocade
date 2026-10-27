@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.nikodindon.retrocade.core.common.ControlScheme
+import com.nikodindon.retrocade.core.common.GestureSensitivity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -35,15 +36,25 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setMusicEnabled(enabled: Boolean) = update { it.copy(musicEnabled = enabled) }
 
+    suspend fun setSfxVolume(volume: Int) = update {
+        it.copy(sfxVolume = volume.coerceIn(VOLUME_MIN, VOLUME_MAX))
+    }
+
+    suspend fun setMusicVolume(volume: Int) = update {
+        it.copy(musicVolume = volume.coerceIn(VOLUME_MIN, VOLUME_MAX))
+    }
+
     suspend fun setHapticsEnabled(enabled: Boolean) = update { it.copy(hapticsEnabled = enabled) }
 
     suspend fun setControlScheme(scheme: ControlScheme) = update {
         it.copy(controlScheme = scheme.name)
     }
 
-    suspend fun setSwipeSensitivity(sensitivity: Float) = update {
-        it.copy(swipeSensitivity = sensitivity.coerceIn(0f, 1f))
+    suspend fun setGestureSensitivity(sensitivity: GestureSensitivity) = update {
+        it.copy(gestureSensitivity = sensitivity.name)
     }
+
+    suspend fun setOnboardingDone(done: Boolean) = update { it.copy(onboardingDone = done) }
 
     suspend fun setShowHoldButton(show: Boolean) = update { it.copy(showHoldButton = show) }
 
@@ -60,6 +71,11 @@ class SettingsRepository @Inject constructor(
         raw?.let {
             runCatching { json.decodeFromString(AppSettings.serializer(), it) }.getOrNull()
         } ?: AppSettings()
+
+    private companion object {
+        const val VOLUME_MIN = 0
+        const val VOLUME_MAX = 100
+    }
 }
 
 @Singleton
@@ -69,7 +85,7 @@ class ScoreRepository @Inject constructor(
     private val mutex = Mutex()
 
     val scores: Flow<ScoreBook> = dataStore.data.map { preferences ->
-        decodeScores(preferences[Keys.SCORES])
+        ScoreCodec.decode(preferences[Keys.SCORES])
     }
 
     suspend fun current(): ScoreBook = scores.first()
@@ -85,15 +101,19 @@ class ScoreRepository @Inject constructor(
         val entry = ScoreEntry(score = score, lines = lines, level = level, timestamp = timestamp)
         val (updated, result) = ScoreRanking.insert(current, gameId, entry)
         dataStore.edit { preferences ->
-            preferences[Keys.SCORES] = json.encodeToString(ScoreBook.serializer(), updated)
+            preferences[Keys.SCORES] = ScoreCodec.encode(updated)
         }
         result
     }
 
-    private fun decodeScores(raw: String?): ScoreBook =
-        raw?.let {
-            runCatching { json.decodeFromString(ScoreBook.serializer(), it) }.getOrNull()
-        } ?: ScoreBook()
+    /** Removes every local score. Settings asks for confirmation before calling this. */
+    suspend fun reset() {
+        mutex.withLock {
+            dataStore.edit { preferences ->
+                preferences.remove(Keys.SCORES)
+            }
+        }
+    }
 }
 
 @Singleton

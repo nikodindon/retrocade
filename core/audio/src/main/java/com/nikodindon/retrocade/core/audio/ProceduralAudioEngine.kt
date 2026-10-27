@@ -38,6 +38,12 @@ class ProceduralAudioEngine @Inject constructor(
     private var musicEnabled = true
 
     @Volatile
+    private var sfxVolume = 1f
+
+    @Volatile
+    private var musicVolume = 1f
+
+    @Volatile
     private var musicPcm: ShortArray? = null
 
     @Volatile
@@ -62,6 +68,14 @@ class ProceduralAudioEngine @Inject constructor(
 
     override fun setMusicEnabled(enabled: Boolean) {
         musicEnabled = enabled
+    }
+
+    override fun setSfxVolume(volume: Float) {
+        sfxVolume = volume.coerceIn(0f, 1f)
+    }
+
+    override fun setMusicVolume(volume: Float) {
+        musicVolume = volume.coerceIn(0f, 1f)
     }
 
     override fun playMusic(track: MusicTrack) {
@@ -138,13 +152,13 @@ class ProceduralAudioEngine @Inject constructor(
                         if (voice.finished) {
                             active.removeAt(index)
                         } else {
-                            mixed += voice.nextSample()
+                            mixed += voice.nextSample() * sfxVolume
                             index++
                         }
                     }
 
                     if (musicEnabled && pcm != null && pcm.isNotEmpty()) {
-                        mixed += pcm[musicPosition] / 32768f * MUSIC_VOLUME
+                        mixed += pcm[musicPosition] / 32768f * MUSIC_VOLUME * musicVolume
                         musicPosition += 1
                         if (musicPosition >= pcm.size) musicPosition = 0
                     }

@@ -6,6 +6,9 @@ import com.nikodindon.retrocade.games.api.Game
 import com.nikodindon.retrocade.games.api.GameMeta
 import com.nikodindon.retrocade.games.api.GameSession
 import com.nikodindon.retrocade.games.api.GameSettings
+import com.nikodindon.retrocade.games.api.GameUiContext
+import com.nikodindon.retrocade.games.tetris.ui.TetrisGameScreen
+import androidx.compose.runtime.Composable
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,6 +19,7 @@ class TetrisGame @Inject constructor() : Game {
         name = "Tetris",
         tagline = "Briques de légende",
         description = "Empilez les térominos, complétez des lignes et tenez le plus longtemps possible.",
+        categoryId = "puzzle",
         icon = ProceduralIcon(
             rows = listOf(
                 "..XX....",
@@ -35,6 +39,11 @@ class TetrisGame @Inject constructor() : Game {
 
     override fun createSession(seed: Long, settings: GameSettings): GameSession =
         TetrisSession(seed, settings)
+
+    @Composable
+    override fun GameScreen(context: GameUiContext) {
+        TetrisGameScreen(context)
+    }
 
     companion object {
         const val GAME_ID = "tetris"
