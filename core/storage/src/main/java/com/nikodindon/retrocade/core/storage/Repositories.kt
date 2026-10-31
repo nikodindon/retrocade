@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.nikodindon.retrocade.core.common.ControlScheme
 import com.nikodindon.retrocade.core.common.GestureSensitivity
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -20,6 +21,14 @@ import javax.inject.Singleton
 
 val Context.retrocadeDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "retrocade",
+)
+
+/**
+ * Kept in a separate file so backup rules can exclude the Premium cache without
+ * excluding the user's settings and scores.
+ */
+val Context.premiumDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "premium",
 )
 
 @Singleton
@@ -118,8 +127,11 @@ class ScoreRepository @Inject constructor(
 
 @Singleton
 class PremiumCacheStore @Inject constructor(
-    private val dataStore: DataStore<Preferences>,
+    @ApplicationContext private val context: Context,
 ) : PremiumCache {
+    private val dataStore: DataStore<Preferences>
+        get() = context.premiumDataStore
+
     override suspend fun read(): CachedPremium? {
         val preferences = dataStore.data.first()
         val type = preferences[Keys.PREMIUM_TYPE] ?: return null

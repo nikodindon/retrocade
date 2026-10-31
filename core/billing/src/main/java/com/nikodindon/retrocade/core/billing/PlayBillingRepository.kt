@@ -48,13 +48,14 @@ class PlayBillingRepository @Inject constructor(
         }
     }
 
-    override suspend fun refreshPurchases() {
-        if (runCatching { gateway.connect() }.getOrDefault(false).not()) return
-        val purchases = runCatching { gateway.queryPurchases() }.getOrNull() ?: return
+    override suspend fun refreshPurchases(): Boolean {
+        if (runCatching { gateway.connect() }.getOrDefault(false).not()) return false
+        val purchases = runCatching { gateway.queryPurchases() }.getOrNull() ?: return false
         acknowledgeUnacknowledged(purchases)
         val newState = mapPremium(purchases, ids)
         _premiumState.value = newState
         cachePremium(newState)
+        return true
     }
 
     override suspend fun loadProducts() {
@@ -88,14 +89,10 @@ class PlayBillingRepository @Inject constructor(
         ids: BillingProductIds,
     ): PremiumState {
         val active = purchases.filter { it.purchased }
-        return when {
-            active.any { it.productId == ids.lifetime } ->
-                PremiumState.Premium(PremiumType.LIFETIME)
-
-            active.any { it.productId == ids.monthly } ->
-                PremiumState.Premium(PremiumType.MONTHLY)
-
-            else -> PremiumState.Free
+        return if (active.any { it.productId == ids.lifetime }) {
+            PremiumState.Premium(PremiumType.LIFETIME)
+        } else {
+            PremiumState.Free
         }
     }
 
@@ -103,7 +100,6 @@ class PlayBillingRepository @Inject constructor(
         val cached = runCatching { cache.read() }.getOrNull() ?: return
         _premiumState.value = when (cached.type) {
             PremiumType.LIFETIME.name -> PremiumState.Premium(PremiumType.LIFETIME)
-            PremiumType.MONTHLY.name -> PremiumState.Premium(PremiumType.MONTHLY)
             FREE_CACHE -> PremiumState.Free
             else -> PremiumState.Unknown
         }

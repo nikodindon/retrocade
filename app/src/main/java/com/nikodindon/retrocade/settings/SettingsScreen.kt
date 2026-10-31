@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -32,12 +33,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nikodindon.retrocade.BuildConfig
+import com.nikodindon.retrocade.Links
 import com.nikodindon.retrocade.core.billing.PremiumState
-import com.nikodindon.retrocade.core.billing.PremiumType
 import com.nikodindon.retrocade.core.common.ControlScheme
 import com.nikodindon.retrocade.core.common.GestureSensitivity
 import com.nikodindon.retrocade.core.storage.AppSettings
@@ -47,6 +51,7 @@ import com.nikodindon.retrocade.core.ui.RetroBackdrop
 import com.nikodindon.retrocade.core.ui.RetroButton
 import com.nikodindon.retrocade.core.ui.RetroColors
 import com.nikodindon.retrocade.core.ui.RetroHeader
+import com.nikodindon.retrocade.navigation.findActivity
 import kotlin.math.roundToInt
 
 data class SettingsActions(
@@ -70,14 +75,20 @@ fun SettingsScreen(
     val viewModel: SettingsViewModel = hiltViewModel()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val premium by viewModel.premium.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
+    val uriHandler = LocalUriHandler.current
 
     SettingsContent(
         settings = settings,
         premium = premium,
         restoreMessage = viewModel.restoreMessage,
         scoresMessage = viewModel.scoresMessage,
+        privacyMessage = viewModel.privacyMessage,
         onBack = onBack,
         onStore = onStore,
+        onPrivacyOptions = { activity?.let(viewModel::showPrivacyOptions) },
+        onPrivacyPolicy = { uriHandler.openUri(Links.PRIVACY_POLICY) },
         actions = SettingsActions(
             setMusicEnabled = viewModel::setMusicEnabled,
             setSfxEnabled = viewModel::setSfxEnabled,
@@ -100,8 +111,11 @@ fun SettingsContent(
     premium: PremiumState,
     restoreMessage: String?,
     scoresMessage: String?,
+    privacyMessage: String?,
     onBack: () -> Unit,
     onStore: () -> Unit,
+    onPrivacyOptions: () -> Unit,
+    onPrivacyPolicy: () -> Unit,
     actions: SettingsActions,
 ) {
     var showResetDialog by remember { mutableStateOf(false) }
@@ -350,8 +364,50 @@ fun SettingsContent(
                 }
 
                 Spacer(Modifier.height(16.dp))
+                SectionLabel("CONFIDENTIALITÉ")
+                NeonPanel(Modifier.fillMaxWidth(), accent = RetroColors.NeonCyan) {
+                    Column(Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "Publicités et consentement",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = RetroColors.TextPrimary,
+                        )
+                        Text(
+                            text = "Modifiez votre choix pour la publicité personnalisée. " +
+                                "Cette option est requise dans l'Espace économique européen.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = RetroColors.TextMuted,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+                        )
+                        RetroButton(
+                            label = "Options de confidentialité",
+                            onClick = onPrivacyOptions,
+                            accent = RetroColors.NeonCyan,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("settings_privacy_options"),
+                        )
+                        privacyMessage?.let { message ->
+                            Text(
+                                text = message,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = RetroColors.NeonCyan,
+                                modifier = Modifier.padding(top = 10.dp),
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        RetroButton(
+                            label = "Politique de confidentialité",
+                            onClick = onPrivacyPolicy,
+                            accent = RetroColors.TextMuted,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
                 Text(
-                    text = "VERSION 0.2.0  ·  MIN SDK 24",
+                    text = "VERSION ${BuildConfig.VERSION_NAME}  ·  CODE ${BuildConfig.VERSION_CODE}  ·  MIN SDK 24",
                     style = MaterialTheme.typography.labelSmall,
                     color = RetroColors.TextDim,
                     modifier = Modifier.fillMaxWidth(),
@@ -464,6 +520,7 @@ private fun SchemeChip(
             .background(accent.copy(alpha = if (selected) 0.14f else 0.04f), RoundedCornerShape(2.dp))
             .border(1.dp, accent, RoundedCornerShape(2.dp))
             .clickable(onClick = onClick)
+            .heightIn(min = 48.dp)
             .padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.Center,
     ) {
@@ -478,8 +535,5 @@ private fun SchemeChip(
 private fun premiumLabel(premium: PremiumState): String = when (premium) {
     PremiumState.Unknown -> "STATUT : VÉRIFICATION…"
     PremiumState.Free -> "OFFRE GRATUITE"
-    is PremiumState.Premium -> when (premium.type) {
-        PremiumType.MONTHLY -> "PREMIUM MENSUEL ACTIF"
-        PremiumType.LIFETIME -> "PREMIUM À VIE ACTIF"
-    }
+    is PremiumState.Premium -> "PREMIUM À VIE ACTIF"
 }

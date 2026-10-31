@@ -53,8 +53,12 @@ class PaywallViewModel @Inject constructor(
         if (busy) return
         busy = true
         viewModelScope.launch {
-            billingRepository.refreshPurchases()
-            message = "Achats restaurés depuis Google Play."
+            val restored = billingRepository.refreshPurchases()
+            message = if (restored) {
+                "Achats restaurés depuis Google Play."
+            } else {
+                "Impossible de vérifier les achats. Vérifiez votre connexion et réessayez."
+            }
             busy = false
         }
     }

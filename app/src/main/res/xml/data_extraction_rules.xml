@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12 and above. Settings and scores may be backed up or transferred, but
+  the Premium cache and advertising state must not be. Play Billing is the source
+  of truth and re-verifies the purchase at startup.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="datastore/premium.preferences_pb" />
+        <exclude domain="sharedpref" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="datastore/premium.preferences_pb" />
+        <exclude domain="sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>

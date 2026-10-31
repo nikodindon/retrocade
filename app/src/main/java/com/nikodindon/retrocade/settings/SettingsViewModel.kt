@@ -1,10 +1,12 @@
 package com.nikodindon.retrocade.settings
 
+import android.app.Activity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nikodindon.retrocade.core.ads.MonetizationController
 import com.nikodindon.retrocade.core.billing.BillingRepository
 import com.nikodindon.retrocade.core.billing.PremiumState
 import com.nikodindon.retrocade.core.common.ControlScheme
@@ -24,6 +26,7 @@ class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val scoreRepository: ScoreRepository,
     private val billingRepository: BillingRepository,
+    private val monetizationController: MonetizationController,
 ) : ViewModel() {
     val settings: StateFlow<AppSettings> = settingsRepository.settings.stateIn(
         scope = viewModelScope,
@@ -37,6 +40,9 @@ class SettingsViewModel @Inject constructor(
         private set
 
     var scoresMessage by mutableStateOf<String?>(null)
+        private set
+
+    var privacyMessage by mutableStateOf<String?>(null)
         private set
 
     fun setMusicEnabled(enabled: Boolean) {
@@ -73,8 +79,11 @@ class SettingsViewModel @Inject constructor(
 
     fun restorePurchases() {
         viewModelScope.launch {
-            billingRepository.refreshPurchases()
-            restoreMessage = "Achats vérifiés auprès de Google Play."
+            restoreMessage = if (billingRepository.refreshPurchases()) {
+                "Achats vérifiés auprès de Google Play."
+            } else {
+                "Vérification impossible : connexion ou Google Play indisponible."
+            }
         }
     }
 
@@ -82,6 +91,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             scoreRepository.reset()
             scoresMessage = "Scores locaux effacés."
+        }
+    }
+
+    fun showPrivacyOptions(activity: Activity) {
+        privacyMessage = null
+        monetizationController.showPrivacyOptions(activity) { message ->
+            privacyMessage = message
         }
     }
 }

@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -26,7 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nikodindon.retrocade.core.storage.AppSettings
 import com.nikodindon.retrocade.core.ui.NeonPanel
@@ -61,7 +60,10 @@ fun GameRoute(
     val context = LocalContext.current
     val activity = remember(context) { context.findActivity() }
     var seed by rememberSaveable(game.meta.id) { mutableLongStateOf(Random.nextLong()) }
-    var started by remember(game.meta.id, seed) { mutableStateOf(false) }
+    // Sentinel: no seed has completed the ad gate yet.
+    var readySeed by rememberSaveable(game.meta.id) {
+        mutableLongStateOf(Long.MIN_VALUE)
+    }
 
     val currentSettings = settings
     if (currentSettings == null) {
@@ -70,11 +72,14 @@ fun GameRoute(
     }
 
     // The session only exists once the launch ad (if any) is out of the way.
+    // This also covers replay: a new seed must pass through the ad gate before
+    // a new session is created, so gameplay never starts behind an interstitial.
     LaunchedEffect(game.meta.id, seed) {
-        viewModel.startGame(activity) { started = true }
+        val requestedSeed = seed
+        viewModel.startGame(activity) { readySeed = requestedSeed }
     }
 
-    if (!started) {
+    if (readySeed != seed) {
         GameLoadingScreen(game = game, message = "PRÉPARATION DE LA PARTIE…")
         return
     }

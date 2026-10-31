@@ -62,7 +62,7 @@ fun RetroHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (onBack != null) {
-            IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
+            IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Retour",
