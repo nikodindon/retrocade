@@ -6,6 +6,70 @@ versionnage sémantique.
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-10-31
+
+### Ajouté
+
+- Procédure de publication Play complète : fiche française, captures à réaliser,
+  sécurité des données, questionnaire IARC, public cible 13+, test fermé et
+  checklist QA.
+- Politique de confidentialité publiée depuis `docs/privacy/` et accessible depuis
+  les paramètres et le paywall.
+- Workflow GitHub Actions déclenché par un tag `v*.*.*` : tests, lint release,
+  AAB signé avec les secrets, mapping R8 et artefacts, sans aucun upload Play.
+- Garde-fou de release renforcé : identifiants AdMob de production, version
+  `1.0.0`, `versionCode` positif, signature d'upload et absence d'abonnement.
+- Écran « Options de confidentialité » pour rouvrir le formulaire de consentement
+  UMP et retirer un consentement publicitaire.
+- Sauvegarde Android et data-extraction XML : scores et réglages sauvegardés, cache
+  Premium et état publicitaire exclus.
+- ADR 0012 (SDK 36, outillage et pages 16 Ko), 0013 (consentement publicitaire),
+  0014 (sauvegarde et cache Premium) et 0015 (périmètre v1.0).
+- Script reproductible `tools/store-assets/generate_store_assets.py` pour l'icône
+  512 × 512 et l'image de mise en avant 1024 × 500.
+
+### Modifié
+
+- Version portée à `1.0.0` (`versionCode` 3), `compileSdk` et `targetSdk` à 36.
+- Outillage relevé : Gradle 8.13, AGP 8.13.2, Kotlin 2.2.21, KSP 2.2.21-2.0.5,
+  Hilt 2.57.2, Compose BOM 2025.12.01.
+- Google Mobile Ads 25.5.0, UMP 4.0.0 et Play Billing 8.3.0.
+- Billing limité à l'achat unique `retrocade_premium_lifetime` ; suppression de
+  tous les produits, configurations et textes d'abonnement mensuel.
+- Achat `PENDING` non accordé, acquittement conservé, restauration via
+  `queryPurchasesAsync` et révocation après remboursement.
+- Publicités chargées uniquement si le consentement autorise les requêtes et si le
+  statut Premium est connu et gratuit ; aucun chargement pour un utilisateur
+  Premium ou de statut inconnu.
+- La première partie du processus ne déclenche aucune publicité ; les parties
+  suivantes peuvent afficher un interstitiel avant la création de la session.
+- R8, minification et réduction des ressources activés pour la release.
+- Orientation libre, navigation prédictive, edge-to-edge Android 16, libellés de
+  version issus de `BuildConfig`, cibles tactiles et libellés TalkBack améliorés.
+- Documentation de release en français, README et ADR 0005 mis à jour.
+
+### Corrigé
+
+- Rejouer après un game over ne démarre plus la partie derrière l'interstitiel.
+- La fermeture d'une publicité ou un échec de chargement ne bloque plus le jeu.
+- Un cache Premium hérité d'un ancien abonnement mensuel ne donne plus Premium.
+- La restauration des achats affiche un message d'erreur explicite si Google Play
+  est indisponible, au lieu d'annoncer un succès.
+- Les réglages et scores v0.2 sont conservés après la mise à jour vers 1.0.0.
+
+### Notes
+
+- **Périmètre Tetris uniquement** : la branche v0.3 (Astéroïdes, PR #4) n'est pas
+  intégrée dans `develop`. Le hub, le registre et la route générique restent prêts
+  pour les jeux suivants (ADR 0015).
+- Vérification des achats côté client uniquement ; aucun backend en 1.0.0 (ADR 0005).
+- L'AAB de validation local utilise un keystore temporaire et des identifiants de
+  test : il n'est pas publiable. La release réelle exige les secrets du propriétaire.
+- `versionCode` 3 repose sur la dernière version publiée dans ce dépôt (2) ; il doit
+  être confirmé dans Play Console avant l'upload.
+- Le test fermé de 12 testeurs pendant 14 jours reste à exécuter avant de demander
+  l'accès à la production.
+
 ## [0.2.0] — 2026-10-27
 
 ### Ajouté
@@ -57,7 +121,7 @@ versionnage sémantique.
 - Scores locaux (top 10 et meilleur score) et paramètres persistés en DataStore.
 - AdMob interstitiel avec UMP, `AdPolicy` non bloquante, préchargement et
   aucune publicité avant la première partie ni pendant une session de jeu.
-- Play Billing : abonnement mensuel, achat à vie, restauration, cache hors ligne.
+- Play Billing : achat à vie, restauration, cache hors ligne.
 - Paywall, écran de scores, paramètres, hub et navigation Compose.
 - Tests unitaires des modules cœur et de la logique Tetris, tests instrumentés
   Compose de l'écran de jeu (plateau, pause, reprise).
