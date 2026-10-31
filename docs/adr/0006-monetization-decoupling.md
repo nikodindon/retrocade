@@ -13,7 +13,8 @@ parcours (jamais à l'ouverture de l'application).
 ## Décision
 
 - `core:billing` expose `BillingRepository.premiumState: StateFlow<PremiumState>`
-  (`Unknown`, `Free`, `Premium(MONTHLY|LIFETIME)`).
+  (`Unknown`, `Free`, `Premium(LIFETIME)`). Depuis la v1.0.0, le seul produit est
+  l'achat unique à vie ; aucun abonnement n'est exposé.
 - `core:ads` expose `AdPolicy.shouldShowInterstitial(isFirstGame: Boolean): Boolean`,
   qui répond `false` si l'utilisateur est Premium, si l'état n'est pas connu, s'il
   s'agit de la première partie du processus, ou si l'annonce n'est pas chargée.
@@ -33,5 +34,6 @@ parcours (jamais à l'ouverture de l'application).
 - Les jeux restent testables sans SDK publicitaire.
 - `AdPolicy` et le mapping des achats sont testés avec des fakes.
 - Une panne AdMob dégrade la monétisation, jamais le jeu.
-- L'initialisation AdMob attend le résultat du consentement UMP ; en cas d'échec,
-  elle est tout de même tentée conformément aux règles Google.
+- Depuis la v1.0.0, l'initialisation AdMob attend le résultat du consentement UMP et
+  n'a lieu que si `ConsentInformation.canRequestAds()` vaut `true`. En cas d'échec
+  du consentement, aucune publicité n'est chargée (ADR 0013).

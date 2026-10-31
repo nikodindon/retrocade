@@ -54,6 +54,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -211,6 +216,10 @@ fun TetrisScreen(
                         .weight(1f)
                         .fillMaxHeight()
                         .testTag("tetris_board")
+                        .semantics {
+                            contentDescription =
+                                "Plateau de Tetris. Le schéma Boutons offre des commandes accessibles."
+                        }
                         .then(
                             if (ui.settings.controlScheme == ControlScheme.TAP) {
                                 Modifier.tetrisTouchInput(
@@ -287,7 +296,7 @@ private fun TetrisTopBar(
     ) {
         IconButton(
             onClick = onExit,
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(48.dp),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -318,7 +327,7 @@ private fun TetrisTopBar(
         IconButton(
             onClick = onPause,
             modifier = Modifier
-                .size(40.dp)
+                .size(48.dp)
                 .testTag("tetris_pause"),
         ) {
             Icon(
@@ -427,11 +436,12 @@ private fun HoldColumn(
             Spacer(Modifier.height(8.dp))
             ControlKey(
                 label = "HOLD",
+                description = "Réserve",
                 enabled = canHold,
                 onClick = onHold,
                 modifier = Modifier
                     .width(54.dp)
-                    .height(32.dp),
+                    .height(48.dp),
             )
         }
         Spacer(Modifier.height(14.dp))
@@ -533,17 +543,20 @@ private fun ControlPad(
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             HoldKey(
                 label = "◀",
+                description = "Déplacer à gauche",
                 onPress = { onInput(InputEvent.HorizontalHold(-1, true)) },
                 onRelease = { onInput(InputEvent.HorizontalHold(-1, false)) },
                 modifier = Modifier.weight(1f),
             )
             ControlKey(
                 label = "↻",
+                description = "Tourner",
                 onClick = { onInput(InputEvent.RotateClockwise) },
                 modifier = Modifier.weight(1.2f),
             )
             HoldKey(
                 label = "▶",
+                description = "Déplacer à droite",
                 onPress = { onInput(InputEvent.HorizontalHold(1, true)) },
                 onRelease = { onInput(InputEvent.HorizontalHold(1, false)) },
                 modifier = Modifier.weight(1f),
@@ -552,18 +565,21 @@ private fun ControlPad(
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             HoldKey(
                 label = "▼",
+                description = "Descendre",
                 onPress = { onInput(InputEvent.SoftDrop(true)) },
                 onRelease = { onInput(InputEvent.SoftDrop(false)) },
                 modifier = Modifier.weight(1.3f),
             )
             ControlKey(
                 label = "DROP",
+                description = "Chute rapide",
                 onClick = { onInput(InputEvent.HardDrop) },
                 modifier = Modifier.weight(1.3f),
             )
             if (showHoldButton) {
                 ControlKey(
                     label = "HOLD",
+                    description = "Réserve",
                     enabled = canHold,
                     onClick = { onInput(InputEvent.HoldPiece) },
                     modifier = Modifier.weight(1f),
@@ -579,10 +595,15 @@ private fun ControlKey(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    description: String = label,
 ) {
     Box(
         modifier = modifier
-            .height(46.dp)
+            .height(48.dp)
+            .semantics {
+                contentDescription = description
+                role = Role.Button
+            }
             .background(
                 if (enabled) RetroColors.Surface else RetroColors.Surface.copy(alpha = 0.4f),
                 RoundedCornerShape(3.dp),
@@ -610,10 +631,22 @@ private fun HoldKey(
     onRelease: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    description: String = label,
 ) {
     Box(
         modifier = modifier
-            .height(46.dp)
+            .height(48.dp)
+            .semantics {
+                contentDescription = description
+                role = Role.Button
+                onClick {
+                    if (enabled) {
+                        onPress()
+                        onRelease()
+                    }
+                    true
+                }
+            }
             .background(RetroColors.Surface, RoundedCornerShape(3.dp))
             .border(1.dp, RetroColors.NeonCyan.copy(alpha = 0.55f), RoundedCornerShape(3.dp))
             .pointerInput(enabled) {

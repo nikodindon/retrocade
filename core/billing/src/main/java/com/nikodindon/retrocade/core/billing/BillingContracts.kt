@@ -4,7 +4,6 @@ import android.app.Activity
 import kotlinx.coroutines.flow.StateFlow
 
 enum class PremiumType {
-    MONTHLY,
     LIFETIME,
 }
 
@@ -13,16 +12,14 @@ sealed interface PremiumState {
 
     data object Free : PremiumState
 
-    data class Premium(val type: PremiumType) : PremiumState
+    data class Premium(val type: PremiumType = PremiumType.LIFETIME) : PremiumState
 }
 
 enum class BillingProductType {
-    MONTHLY,
     LIFETIME,
 }
 
 data class BillingProductIds(
-    val monthly: String,
     val lifetime: String,
 )
 
@@ -31,7 +28,6 @@ data class BillingProduct(
     val type: BillingProductType,
     val title: String,
     val formattedPrice: String,
-    val offerToken: String?,
 )
 
 data class PurchaseInfo(
@@ -68,7 +64,8 @@ interface BillingRepository {
 
     fun initialize()
 
-    suspend fun refreshPurchases()
+    /** Returns false when Google Play cannot be reached or the query fails. */
+    suspend fun refreshPurchases(): Boolean
 
     suspend fun loadProducts()
 

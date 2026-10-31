@@ -12,6 +12,7 @@ import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
+import com.android.billingclient.api.QueryProductDetailsResult
 import com.android.billingclient.api.QueryPurchasesParams
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -67,27 +68,24 @@ class PlayBillingGateway @Inject constructor(
     }
 
     override suspend fun queryProducts(ids: BillingProductIds): List<BillingProduct> {
+        if (ids.lifetime.isBlank()) return emptyList()
         if (!connect()) return emptyList()
-        val products = listOf(
-            QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(ids.monthly)
-                .setProductType(BillingClient.ProductType.SUBS)
-                .build(),
-            QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(ids.lifetime)
-                .setProductType(BillingClient.ProductType.INAPP)
-                .build(),
-        )
+        val product = QueryProductDetailsParams.Product.newBuilder()
+            .setProductId(ids.lifetime)
+            .setProductType(BillingClient.ProductType.INAPP)
+            .build()
         return suspendCancellableCoroutine { continuation ->
             client.queryProductDetailsAsync(
-                QueryProductDetailsParams.newBuilder().setProductList(products).build(),
-            ) { result, details ->
+                QueryProductDetailsParams.newBuilder().setProductList(listOf(product)).build(),
+            ) { result: BillingResult, queryResult: QueryProductDetailsResult ->
                 if (!continuation.isActive) return@queryProductDetailsAsync
                 if (result.responseCode != BillingClient.BillingResponseCode.OK) {
                     continuation.resume(emptyList())
                     return@queryProductDetailsAsync
                 }
-                continuation.resume(details.mapNotNull { it.toProduct(ids) })
+                continuation.resume(
+                    queryResult.productDetailsList.mapNotNull { it.toProduct(ids) },
+                )
             }
         }
     }
@@ -95,8 +93,7 @@ class PlayBillingGateway @Inject constructor(
     override suspend fun queryPurchases(): List<PurchaseInfo>? {
         if (!connect()) return null
         val inApp = queryPurchases(BillingClient.ProductType.INAPP) ?: return null
-        val subscriptions = queryPurchases(BillingClient.ProductType.SUBS) ?: return null
-        return (inApp + subscriptions).map { purchase ->
+        return inApp.map { purchase ->
             PurchaseInfo(
                 productId = purchase.products.firstOrNull(),
                 purchaseToken = purchase.purchaseToken,
@@ -142,36 +139,29 @@ class PlayBillingGateway @Inject constructor(
                         listOf(
                             QueryProductDetailsParams.Product.newBuilder()
                                 .setProductId(product.id)
-                                .setProductType(
-                                    if (product.type == BillingProductType.MONTHLY) {
-                                        BillingClient.ProductType.SUBS
-                                    } else {
-                                        BillingClient.ProductType.INAPP
-                                    },
-                                )
+                                .setProductType(BillingClient.ProductType.INAPP)
                                 .build(),
                         ),
                     )
                     .build(),
-            ) { result, productDetails ->
+            ) { result: BillingResult, queryResult: QueryProductDetailsResult ->
                 if (!continuation.isActive) return@queryProductDetailsAsync
                 if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                    continuation.resume(productDetails.firstOrNull())
+                    continuation.resume(queryResult.productDetailsList.firstOrNull())
                 } else {
                     continuation.resume(null)
                 }
             }
         } ?: return false
 
-        val detailsParams = BillingFlowParams.ProductDetailsParams.newBuilder()
-            .setProductDetails(details)
-        if (product.type == BillingProductType.MONTHLY) {
-            val token = product.offerToken ?: return false
-            detailsParams.setOfferToken(token)
-        }
-
         val flowParams = BillingFlowParams.newBuilder()
-            .setProductDetailsParamsList(listOf(detailsParams.build()))
+            .setProductDetailsParamsList(
+                listOf(
+                    BillingFlowParams.ProductDetailsParams.newBuilder()
+                        .setProductDetails(details)
+                        .build(),
+                ),
+            )
             .build()
 
         return withContext(Dispatchers.Main) {
@@ -180,27 +170,18 @@ class PlayBillingGateway @Inject constructor(
         }
     }
 
-    private fun ProductDetails.toProduct(ids: BillingProductIds): BillingProduct? = when (productId) {
-        ids.monthly -> {
-            val offer = subscriptionOfferDetails?.firstOrNull()
-            BillingProduct(
-                id = productId,
-                type = BillingProductType.MONTHLY,
-                title = name,
-                formattedPrice = offer?.pricingPhases?.pricingPhaseList
-                    ?.firstOrNull()?.formattedPrice ?: "—",
-                offerToken = offer?.offerToken,
-            )
-        }
-
-        ids.lifetime -> BillingProduct(
+    private fun ProductDetails.toProduct(ids: BillingProductIds): BillingProduct? {
+        if (productId != ids.lifetime) return null
+        val price = oneTimePurchaseOfferDetailsList
+            ?.firstOrNull()
+            ?.formattedPrice
+            ?: oneTimePurchaseOfferDetails?.formattedPrice
+            ?: "—"
+        return BillingProduct(
             id = productId,
             type = BillingProductType.LIFETIME,
             title = name,
-            formattedPrice = oneTimePurchaseOfferDetails?.formattedPrice ?: "—",
-            offerToken = null,
+            formattedPrice = price,
         )
-
-        else -> null
     }
 }

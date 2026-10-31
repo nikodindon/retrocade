@@ -1,14 +1,23 @@
-# Copy this file to local.properties and fill in your production identifiers.
-# local.properties is ignored by git and is never committed.
+# Copiez ce fichier vers local.properties et renseignez les valeurs de production.
+# local.properties est ignoré par git et ne doit jamais être commité.
+# Les mêmes noms peuvent être fournis par des variables d'environnement / secrets CI :
+# l'environnement est prioritaire sur ce fichier.
 
-# Google AdMob production identifiers.
-# Debug builds always use Google's official test identifiers instead.
+# Google AdMob — identifiants de production.
+# Les builds debug utilisent toujours les identifiants de test officiels de Google.
 ADMOB_APP_ID=ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
 ADMOB_INTERSTITIAL_GAME_START=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
 
-# Google Play Billing product identifiers.
-BILLING_SUB_MONTHLY_ID=retrocade_premium_monthly
+# Google Play Billing — produit d'achat unique (aucun abonnement).
 BILLING_LIFETIME_ID=retrocade_premium_lifetime
 
-# Optional Android SDK location (normally written by Android Studio).
-# sdk.dir=/path/to/Android/Sdk
+# Signature de l'AAB release. Les quatre valeurs sont obligatoires pour
+# :app:bundleRelease ; le build debug n'en a pas besoin.
+# RELEASE_STORE_FILE peut être absolu ou relatif à la racine du dépôt.
+RELEASE_STORE_FILE=/chemin/absolu/vers/upload-keystore.jks
+RELEASE_STORE_PASSWORD=
+RELEASE_KEY_ALIAS=
+RELEASE_KEY_PASSWORD=
+
+# Emplacement optionnel du SDK Android (normalement écrit par Android Studio).
+# sdk.dir=/chemin/vers/Android/Sdk

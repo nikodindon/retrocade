@@ -31,8 +31,18 @@ class InterstitialAdManager @Inject constructor(
     @Volatile
     private var sdkReady = false
 
+    @Volatile
+    private var adsAllowed = false
+
     val isReady: Boolean
-        get() = ad != null
+        get() = adsAllowed && ad != null
+
+    fun setAdsAllowed(allowed: Boolean) {
+        adsAllowed = allowed
+        if (!allowed) {
+            ad = null
+        }
+    }
 
     fun onSdkInitialized() {
         sdkReady = true
@@ -40,7 +50,7 @@ class InterstitialAdManager @Inject constructor(
     }
 
     fun preload() {
-        if (!sdkReady || config.interstitialUnitId.isBlank()) return
+        if (!adsAllowed || !sdkReady || config.interstitialUnitId.isBlank()) return
         if (ad != null) return
         if (!loading.compareAndSet(false, true)) return
 
@@ -52,7 +62,8 @@ class InterstitialAdManager @Inject constructor(
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(loadedAd: InterstitialAd) {
                     loading.set(false)
-                    ad = loadedAd
+                    // Consent may have been withdrawn while the request was in flight.
+                    ad = if (adsAllowed) loadedAd else null
                     Log.d(TAG, "Interstitial loaded")
                 }
 
@@ -72,6 +83,7 @@ class InterstitialAdManager @Inject constructor(
      * without ever running a session behind a fullscreen ad.
      */
     fun show(activity: Activity, onFinished: () -> Unit): Boolean {
+        if (!adsAllowed) return false
         val current = ad ?: return false
         ad = null
         var finished = false

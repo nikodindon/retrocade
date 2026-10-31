@@ -14,7 +14,6 @@ object AppModule {
     @Provides
     @Singleton
     fun provideBillingProductIds(): BillingProductIds = BillingProductIds(
-        monthly = BuildConfig.BILLING_MONTHLY_ID,
         lifetime = BuildConfig.BILLING_LIFETIME_ID,
     )
 

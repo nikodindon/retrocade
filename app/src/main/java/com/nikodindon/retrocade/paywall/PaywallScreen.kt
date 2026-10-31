@@ -32,19 +32,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nikodindon.retrocade.core.billing.BillingProduct
 import com.nikodindon.retrocade.core.billing.BillingProductType
 import com.nikodindon.retrocade.core.billing.PremiumState
-import com.nikodindon.retrocade.core.billing.PremiumType
 import com.nikodindon.retrocade.core.ui.NeonPanel
 import com.nikodindon.retrocade.core.ui.PixelDivider
 import com.nikodindon.retrocade.core.ui.RetroBackdrop
 import com.nikodindon.retrocade.core.ui.RetroButton
 import com.nikodindon.retrocade.core.ui.RetroColors
 import com.nikodindon.retrocade.core.ui.RetroHeader
+import com.nikodindon.retrocade.Links
 import com.nikodindon.retrocade.navigation.findActivity
 
 @Composable
@@ -55,6 +56,7 @@ fun PaywallScreen(onBack: () -> Unit) {
     val initialized by viewModel.initialized.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity: Activity? = remember(context) { context.findActivity() }
+    val uriHandler = LocalUriHandler.current
 
     RetroBackdrop(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -99,26 +101,11 @@ fun PaywallScreen(onBack: () -> Unit) {
                 )
                 Spacer(Modifier.height(8.dp))
 
-                val monthly = products.firstOrNull { it.type == BillingProductType.MONTHLY }
                 val lifetime = products.firstOrNull { it.type == BillingProductType.LIFETIME }
 
                 ProductCard(
-                    title = "Premium mensuel",
-                    description = "Abonnement sans engagement, résiliable depuis Google Play.",
-                    product = monthly,
-                    accent = RetroColors.NeonCyan,
-                    action = "S'abonner",
-                    busy = viewModel.busy,
-                    premium = premium,
-                    initialized = initialized,
-                    onPurchase = {
-                        activity?.let { viewModel.purchase(it, BillingProductType.MONTHLY) }
-                    },
-                )
-                Spacer(Modifier.height(10.dp))
-                ProductCard(
                     title = "Premium à vie",
-                    description = "Un paiement unique, pour toujours.",
+                    description = "Un paiement unique. Aucun abonnement, aucun renouvellement.",
                     product = lifetime,
                     accent = RetroColors.Amber,
                     action = "Acheter",
@@ -154,9 +141,16 @@ fun PaywallScreen(onBack: () -> Unit) {
                 Spacer(Modifier.height(14.dp))
                 Text(
                     text = "Les transactions sont traitées par Google Play. Rétrocade ne stocke aucune donnée de paiement. " +
-                        "Le statut premium est vérifié à chaque lancement et conservé localement en cas de coupure réseau.",
+                        "Le statut Premium est vérifié à chaque lancement et conservé localement en cas de coupure réseau.",
                     style = MaterialTheme.typography.labelSmall,
                     color = RetroColors.TextDim,
+                )
+                Spacer(Modifier.height(10.dp))
+                RetroButton(
+                    label = "Politique de confidentialité",
+                    onClick = { uriHandler.openUri(Links.PRIVACY_POLICY) },
+                    accent = RetroColors.TextMuted,
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(28.dp))
             }
@@ -196,10 +190,7 @@ private fun PremiumStatus(premium: PremiumState) {
                     text = when (premium) {
                         PremiumState.Unknown -> "Connexion à Google Play en cours."
                         PremiumState.Free -> "Les interstitiels peuvent apparaître entre deux parties."
-                        is PremiumState.Premium -> when (premium.type) {
-                            PremiumType.MONTHLY -> "Abonnement mensuel · aucune publicité."
-                            PremiumType.LIFETIME -> "Achat à vie · aucune publicité."
-                        }
+                        is PremiumState.Premium -> "Achat à vie · aucune publicité."
                     },
                     style = MaterialTheme.typography.labelSmall,
                     color = RetroColors.TextMuted,

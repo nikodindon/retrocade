@@ -36,8 +36,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nikodindon.retrocade.BuildConfig
 import com.nikodindon.retrocade.core.ui.NeonPanel
 import com.nikodindon.retrocade.core.ui.PixelDivider
 import com.nikodindon.retrocade.core.ui.PixelIcon
@@ -95,7 +96,7 @@ fun HubContent(
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = "ARCADE SYSTEM  ·  BUILD 0.2.0",
+                        text = "ARCADE SYSTEM  ·  BUILD ${BuildConfig.VERSION_NAME}",
                         style = MaterialTheme.typography.labelSmall,
                         color = RetroColors.TextMuted,
                     )

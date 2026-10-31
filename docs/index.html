@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Rétrocade, Tetris rétro pour Android. Achat unique Premium, scores locaux, hors ligne.">
+  <title>Rétrocade</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070a12;
+      --panel: #0d1422;
+      --text: #eaf8ff;
+      --muted: #9bb3c7;
+      --green: #39ffb6;
+      --cyan: #46e6ff;
+      --magenta: #ff3fa4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(27, 42, 68, .35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(27, 42, 68, .35) 1px, transparent 1px),
+        var(--bg);
+      background-size: 28px 28px;
+      color: var(--text);
+      font-family: ui-monospace, "DejaVu Sans Mono", monospace;
+      line-height: 1.6;
+    }
+    main { max-width: 760px; margin: 0 auto; padding: 56px 24px 72px; }
+    .eyebrow { color: var(--muted); font-size: .8rem; letter-spacing: .18em; }
+    h1 { color: var(--green); font-size: clamp(2.2rem, 8vw, 4rem); line-height: 1.1; margin: .3em 0 .2em; }
+    h2 { color: var(--cyan); font-size: 1.05rem; margin-top: 2.2em; }
+    p, li { color: var(--muted); }
+    .rule { height: 2px; background: linear-gradient(90deg, var(--green), var(--cyan), var(--magenta)); margin: 24px 0; }
+    .panel { background: rgba(13, 20, 34, .9); border: 1px solid rgba(57, 255, 182, .35); border-radius: 10px; padding: 20px; }
+    a { color: var(--cyan); }
+    a:hover, a:focus { color: var(--green); }
+    .links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+    .links a { border: 1px solid currentColor; border-radius: 6px; padding: 9px 13px; text-decoration: none; }
+    footer { margin-top: 42px; color: var(--muted); font-size: .8rem; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">ARCADE SYSTEM · ANDROID</div>
+  <h1>RÉTROCADE</h1>
+  <p class="rule"></p>
+  <p><strong>Tetris rétro</strong>, sans publicité grâce à l'achat unique Premium.
+     Scores locaux, jeu hors ligne, interface française.</p>
+
+  <div class="panel">
+    <h2>Le jeu</h2>
+    <p>Rotations SRS, pièce fantôme, réserve, file de trois pièces et top 10 local.
+       Les graphismes sont dessinés par code et la musique est synthétisée en temps réel.</p>
+    <h2>Confidentialité</h2>
+    <p>Pas de compte, pas de serveur Rétrocade, pas de suivi d'audience.
+       Les publicités et les achats sont assurés par Google, selon votre consentement.</p>
+    <div class="links">
+      <a href="privacy/">Politique de confidentialité</a>
+      <a href="https://github.com/nikodindon/retrocade">Code source</a>
+      <a href="mailto:[EMAIL_SUPPORT]">[EMAIL_SUPPORT]</a>
+    </div>
+  </div>
+
+  <footer>
+    Distribution France · Public 13 ans et plus · Éditeur : [NOM_DEVELOPPEUR]
+  </footer>
+</main>
+</body>
+</html>

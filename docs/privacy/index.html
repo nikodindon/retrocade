@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Politique de confidentialité de Rétrocade, application Android de jeux d'arcade rétro.">
+  <meta name="color-scheme" content="dark">
+  <title>Politique de confidentialité — Rétrocade</title>
+  <style>
+    :root {
+      --bg: #070a12;
+      --panel: #0d1422;
+      --grid: #1b2a44;
+      --text: #eaf8ff;
+      --muted: #9bb3c7;
+      --green: #39ffb6;
+      --magenta: #ff3fa4;
+      --amber: #ffc857;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body {
+      margin: 0 auto;
+      max-width: 860px;
+      padding: 28px 20px 64px;
+      background:
+        linear-gradient(rgba(57, 255, 182, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57, 255, 182, 0.035) 1px, transparent 1px),
+        var(--bg);
+      background-size: 28px 28px;
+      color: var(--text);
+      font: 16px/1.65 "Courier New", ui-monospace, monospace;
+    }
+    header {
+      border: 1px solid var(--grid);
+      border-left: 4px solid var(--green);
+      background: rgba(13, 20, 34, 0.92);
+      padding: 22px 20px;
+      margin-bottom: 26px;
+    }
+    .eyebrow {
+      color: var(--green);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+    h1 {
+      color: var(--green);
+      font-size: clamp(24px, 6vw, 40px);
+      line-height: 1.1;
+      margin: 0 0 10px;
+      text-transform: uppercase;
+    }
+    h2 {
+      color: var(--amber);
+      font-size: 20px;
+      margin: 34px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--grid);
+    }
+    h3 { color: var(--magenta); font-size: 17px; margin: 24px 0 8px; }
+    p, li { color: var(--text); }
+    .meta, .note { color: var(--muted); font-size: 14px; }
+    .meta { margin: 0; }
+    .note {
+      border-left: 3px solid var(--magenta);
+      padding: 10px 14px;
+      background: rgba(255, 63, 164, 0.06);
+    }
+    a { color: var(--green); text-underline-offset: 3px; }
+    a:hover, a:focus { color: var(--amber); }
+    ul { padding-left: 22px; }
+    li { margin: 6px 0; }
+    code {
+      color: var(--amber);
+      background: var(--panel);
+      border: 1px solid var(--grid);
+      padding: 1px 5px;
+      font-size: 0.92em;
+    }
+    footer {
+      margin-top: 42px;
+      padding-top: 18px;
+      border-top: 1px solid var(--grid);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 520px) {
+      body { padding: 18px 14px 48px; }
+      header { padding: 18px 16px; }
+      h2 { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Rétrocade · document légal</p>
+    <h1>Politique de confidentialité</h1>
+    <p class="meta">Dernière mise à jour : <strong>31 octobre 2026</strong></p>
+  </header>
+
+  <main>
+    <p>
+      Rétrocade est une application Android de jeux d'arcade rétro éditée par
+      <strong>[NOM_DEVELOPPEUR]</strong>, développeur indépendant établi en France.
+    </p>
+    <ul>
+      <li><strong>Application</strong> : Rétrocade</li>
+      <li><strong>Version concernée</strong> : 1.0.0 et versions ultérieures, sauf mention contraire</li>
+      <li><strong>Identifiant Android</strong> : <code>com.nikodindon.retrocade</code></li>
+      <li><strong>Éditeur et responsable du traitement</strong> : [NOM_DEVELOPPEUR]</li>
+      <li><strong>Contact</strong> : <a href="mailto:[EMAIL_SUPPORT]">[EMAIL_SUPPORT]</a></li>
+      <li><strong>Site</strong> : <a href="https://nikodindon.github.io/retrocade/">https://nikodindon.github.io/retrocade/</a></li>
+    </ul>
+    <p>
+      Cette politique explique quelles données sont utilisées lorsque vous installez
+      et utilisez Rétrocade, pourquoi elles le sont, combien de temps elles sont
+      conservées et quels sont vos droits.
+    </p>
+
+    <h2>1. En résumé</h2>
+    <ul>
+      <li>Rétrocade ne crée <strong>aucun compte</strong>, ne demande <strong>aucune donnée d'identité</strong> et n'exploite <strong>aucun serveur</strong> pour vos données de jeu.</li>
+      <li>Vos réglages, vos scores, votre progression d'onboarding et le cache de votre achat Premium restent sur votre appareil.</li>
+      <li>Les publicités sont fournies par <strong>Google AdMob</strong> et le consentement est recueilli par <strong>Google User Messaging Platform (UMP)</strong>. Ces SDK Google peuvent traiter certaines données techniques et publicitaires, décrites ci-dessous.</li>
+      <li>Les achats sont traités par <strong>Google Play Billing</strong>. Rétrocade ne voit jamais vos données bancaires.</li>
+      <li>Rétrocade ne vend ni ne loue vos données. Aucune donnée n'est partagée avec un serveur contrôlé par l'éditeur, puisqu'il n'en existe pas.</li>
+    </ul>
+
+    <h2>2. Données traitées localement sur votre appareil</h2>
+    <p>Rétrocade enregistre dans le stockage privé de l'application (DataStore) :</p>
+    <ul>
+      <li>vos préférences : musique, effets sonores, volumes, vibrations, schéma de contrôle, sensibilité des gestes, affichage du bouton hold ;</li>
+      <li>vos scores locaux : meilleur score et top 10 par jeu ;</li>
+      <li>l'indicateur indiquant que la présentation de première ouverture a été vue ;</li>
+      <li>un cache local du statut Premium (achat à vie), afin d'éviter un clignotement de l'interface pendant la vérification auprès de Google Play.</li>
+    </ul>
+    <p>
+      Ces données ne quittent pas l'appareil par l'intermédiaire de Rétrocade. Elles
+      sont supprimées lorsque vous effacez les données de l'application ou que vous
+      la désinstallez. Les scores peuvent aussi être effacés depuis les paramètres.
+      Le cache Premium est exclu des sauvegardes Android et des transferts d'appareil ;
+      il est reconstruit à partir de Google Play.
+    </p>
+    <p>
+      La sauvegarde Android peut inclure vos réglages et vos scores si elle est
+      activée sur votre appareil. Elle est alors gérée par Android et votre compte
+      Google, selon les paramètres de votre système.
+    </p>
+
+    <h2>3. Publicités, consentement et données transmises à Google</h2>
+    <p>
+      Rétrocade est gratuite et financée par des publicités interstitielles fournies
+      par <strong>Google AdMob</strong>. La première partie du processus ne contient
+      pas de publicité ; les parties suivantes peuvent en afficher une, sauf si vous
+      avez acheté Premium.
+    </p>
+    <p>
+      Avant toute demande de publicité, Rétrocade utilise <strong>Google UMP</strong>
+      pour vérifier si un consentement est requis et, le cas échéant, le recueillir.
+      AdMob n'est initialisé que si <code>canRequestAds()</code> autorise les requêtes
+      publicitaires. Si vous refusez ou si le consentement ne peut pas être obtenu,
+      aucune publicité n'est chargée.
+    </p>
+    <p>Lorsque les publicités sont autorisées, Google Mobile Ads peut traiter notamment :</p>
+    <ul>
+      <li>des identifiants d'appareil ou publicitaires (par exemple l'identifiant de publicité Android, selon votre consentement et les paramètres de votre appareil) ;</li>
+      <li>l'adresse IP et une localisation géographique approximative qui peut en être déduite ;</li>
+      <li>des informations sur l'appareil, le système, la langue et l'application ;</li>
+      <li>des données sur les publicités affichées, les interactions et les diagnostics (chargement, erreurs, performances).</li>
+    </ul>
+    <p>
+      Ces données sont traitées par Google pour fournir, mesurer et sécuriser les
+      annonces, et le cas échéant pour la personnalisation publicitaire. Rétrocade
+      ne reçoit pas ces données sous une forme permettant de vous identifier et ne
+      les transmet à aucun serveur qui lui appartienne.
+    </p>
+    <p>Pour en savoir plus :</p>
+    <ul>
+      <li><a href="https://policies.google.com/privacy">Politique de confidentialité de Google</a></li>
+      <li><a href="https://policies.google.com/technologies/ads">Technologies publicitaires de Google</a></li>
+      <li><a href="https://adssettings.google.com">Paramètres des annonces Google</a></li>
+    </ul>
+    <p>
+      Vous pouvez modifier votre choix à tout moment dans Rétrocade :
+      <strong>Paramètres → Confidentialité → Options de confidentialité</strong>.
+      Ce bouton n'apparaît comme requis que dans les régions où la réglementation
+      l'impose. Vous pouvez aussi réinitialiser ou supprimer votre identifiant de
+      publicité dans les réglages Android.
+    </p>
+
+    <h2>4. Achat Premium et Google Play Billing</h2>
+    <p>
+      L'achat <strong>Premium à vie</strong> est un achat unique, sans abonnement ni
+      renouvellement. Il est traité par <strong>Google Play Billing</strong>.
+      Rétrocade reçoit de Google Play :
+    </p>
+    <ul>
+      <li>l'identifiant du produit (<code>retrocade_premium_lifetime</code>) ;</li>
+      <li>un jeton d'achat opaque ;</li>
+      <li>l'état de l'achat (acheté, en attente, etc.) et son état d'acquittement.</li>
+    </ul>
+    <p>
+      Ces informations servent uniquement à vérifier et restaurer votre droit Premium.
+      Le jeton est utilisé localement pour interroger Google Play et acquitter l'achat ;
+      il n'est envoyé à aucun serveur de l'éditeur. Rétrocade ne reçoit
+      <strong>jamais</strong> vos numéros de carte, votre adresse de facturation ou vos
+      identifiants Google. Ces données sont traitées par Google Play selon sa propre
+      politique.
+    </p>
+    <p>
+      Un achat en attente (<code>PENDING</code>) n'ouvre pas le mode Premium tant que
+      Google Play ne l'a pas confirmé. Un achat remboursé est retiré au prochain
+      contrôle réussi de vos achats. Vous pouvez restaurer un achat depuis la boutique
+      ou les paramètres.
+    </p>
+
+    <h2>5. Ce que Rétrocade ne fait pas</h2>
+    <p>Rétrocade ne collecte pas et ne demande pas :</p>
+    <ul>
+      <li>votre nom, votre adresse e-mail, votre numéro de téléphone ou votre adresse postale ;</li>
+      <li>vos contacts, votre calendrier, vos photos, votre caméra ou votre microphone ;</li>
+      <li>votre position GPS précise ;</li>
+      <li>des données de santé, d'opinion politique, de religion ou d'orientation sexuelle ;</li>
+      <li>un compte utilisateur, un profil public ou des messages.</li>
+    </ul>
+    <p>
+      L'application n'intègre pas d'outil d'analyse d'audience, de rapport de plantage
+      ou de suivi publicitaire autre que les SDK Google décrits ci-dessus. Elle
+      n'utilise pas de cookies web : il s'agit d'une application native.
+    </p>
+
+    <h2>6. Partage et destinataires</h2>
+    <p>
+      Rétrocade ne vend, ne loue et ne partage pas vos données avec des tiers pour son
+      propre compte. Les seuls destinataires techniques sont :
+    </p>
+    <ul>
+      <li><strong>Google Ireland Limited / Google LLC</strong> pour AdMob, UMP et Google Play Billing ;</li>
+      <li><strong>Google</strong> pour la sauvegarde Android, si vous l'avez activée sur votre appareil ;</li>
+      <li>les autorités, uniquement si la loi l'exige.</li>
+    </ul>
+    <p>
+      Ces prestataires agissent selon leurs propres politiques et, pour les services
+      publicitaires, selon les bases légales et les paramètres de consentement
+      applicables. Ils peuvent traiter des données en dehors de l'Espace économique
+      européen, notamment aux États-Unis, avec les garanties prévues par Google
+      (clauses contractuelles types de la Commission européenne et, le cas échéant,
+      cadre de protection des données UE–États-Unis).
+    </p>
+
+    <h2>7. Bases légales (RGPD)</h2>
+    <p>Lorsque le RGPD s'applique, Rétrocade s'appuie sur :</p>
+    <ul>
+      <li><strong>votre consentement</strong> (article 6.1.a) pour la publicité personnalisée, le stockage ou l'accès aux informations de votre appareil à des fins publicitaires, lorsque ce consentement est requis ;</li>
+      <li><strong>l'intérêt légitime</strong> (article 6.1.f) pour le fonctionnement, la sécurité et la prévention de la fraude, ainsi que pour les publicités non personnalisées lorsque la réglementation le permet ;</li>
+      <li><strong>l'exécution du contrat</strong> (article 6.1.b) pour fournir l'achat Premium et vérifier votre droit à ce service ;</li>
+      <li><strong>le respect d'une obligation légale</strong> (article 6.1.c) lorsque la loi l'impose.</li>
+    </ul>
+    <p>
+      Vous pouvez retirer votre consentement à tout moment, sans que cela remette en
+      cause les traitements effectués avant ce retrait. Le retrait de la publicité
+      personnalisée n'empêche pas de jouer.
+    </p>
+
+    <h2>8. Durées de conservation</h2>
+    <ul>
+      <li><strong>Réglages, scores, onboarding</strong> : sur votre appareil jusqu'à leur effacement, la suppression des données de l'application ou la désinstallation.</li>
+      <li><strong>Cache Premium</strong> : sur votre appareil jusqu'à la mise à jour du statut, la suppression des données ou la désinstallation. Il est exclu des sauvegardes.</li>
+      <li><strong>Données publicitaires et de facturation</strong> : conservées par Google selon ses propres durées, définies dans sa politique de confidentialité. Rétrocade n'en conserve aucune copie sur un serveur.</li>
+      <li><strong>Sauvegarde Android</strong> : selon les paramètres de sauvegarde de votre compte Google.</li>
+    </ul>
+
+    <h2>9. Sécurité</h2>
+    <p>
+      Rétrocade stocke ses données dans l'espace privé de l'application, protégé par
+      le bac à sable Android et les protections de votre appareil. Les échanges avec
+      Google AdMob, UMP et Google Play utilisent les mécanismes de sécurité de Google
+      et du système Android. L'application ne dispose d'aucun serveur et d'aucune base
+      de données distante contrôlée par l'éditeur.
+    </p>
+    <p>
+      Aucune méthode n'offre une sécurité absolue. Si vous pensez qu'un tiers a accédé
+      à votre appareil ou à vos données, contactez
+      <a href="mailto:[EMAIL_SUPPORT]">[EMAIL_SUPPORT]</a>.
+    </p>
+
+    <h2>10. Vos droits</h2>
+    <p>Si le RGPD s'applique, vous disposez des droits suivants :</p>
+    <ul>
+      <li>accéder à vos données et en obtenir une copie ;</li>
+      <li>demander leur rectification ;</li>
+      <li>demander leur effacement ;</li>
+      <li>demander la limitation du traitement ;</li>
+      <li>vous opposer à certains traitements ;</li>
+      <li>retirer votre consentement ;</li>
+      <li>demander la portabilité des données que vous avez fournies.</li>
+    </ul>
+    <p>
+      Pour les données locales, vous pouvez exercer une partie de ces droits directement
+      depuis l'application (effacement des scores, réinitialisation des données Android,
+      désinstallation). Pour les autres demandes, écrivez à
+      <a href="mailto:[EMAIL_SUPPORT]">[EMAIL_SUPPORT]</a>.
+    </p>
+    <p>
+      Les données traitées par Google relèvent aussi des droits que vous pouvez exercer
+      auprès de Google. Vous pouvez introduire une réclamation auprès de la
+      <strong>CNIL</strong> :
+    </p>
+    <ul>
+      <li>CNIL, 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07, France</li>
+      <li><a href="https://www.cnil.fr/fr/plaintes">https://www.cnil.fr/fr/plaintes</a></li>
+    </ul>
+
+    <h2>11. Enfants et adolescents</h2>
+    <p>
+      Rétrocade s'adresse à un public de <strong>13 ans et plus</strong> et n'est pas
+      destinée aux enfants de moins de 13 ans. L'application n'est pas conçue pour le
+      programme « Families » de Google Play et ne collecte pas sciemment de données
+      concernant des enfants. Si vous êtes parent ou tuteur et pensez qu'un enfant de
+      moins de 13 ans a utilisé l'application, contactez
+      <a href="mailto:[EMAIL_SUPPORT]">[EMAIL_SUPPORT]</a> afin que nous puissions
+      vous aider à supprimer les données locales concernées.
+    </p>
+
+    <h2>12. Transferts hors de l'Union européenne</h2>
+    <p>
+      L'éditeur ne transfère aucune donnée vers un pays tiers, car il n'exploite pas
+      de serveur. Les prestataires Google peuvent traiter des données aux États-Unis
+      ou dans d'autres pays, avec les garanties décrites dans leurs politiques et les
+      mécanismes de conformité applicables. Pour les publicités, le consentement
+      recueilli par UMP tient compte des transferts et des partenaires publicitaires
+      configurés dans AdMob.
+    </p>
+
+    <h2>13. Modifications de cette politique</h2>
+    <p>
+      Cette politique peut évoluer pour refléter une nouvelle fonctionnalité, un
+      changement de prestataire ou une obligation légale. La date de mise à jour figure
+      en tête de page. En cas de changement important, une information sera ajoutée
+      dans l'application ou sur la fiche Google Play avant l'entrée en vigueur.
+    </p>
+    <p>
+      La version de référence est publiée à l'adresse :
+      <a href="https://nikodindon.github.io/retrocade/privacy/">https://nikodindon.github.io/retrocade/privacy/</a>
+    </p>
+
+    <h2>14. Contact</h2>
+    <p>Pour toute question relative à cette politique ou à vos données :</p>
+    <ul>
+      <li><strong>Éditeur</strong> : [NOM_DEVELOPPEUR]</li>
+      <li><strong>E-mail</strong> : <a href="mailto:[EMAIL_SUPPORT]">[EMAIL_SUPPORT]</a></li>
+      <li><strong>Pays</strong> : France</li>
+    </ul>
+    <p>
+      Vous pouvez aussi utiliser les réglages Android pour effacer les données de
+      l'application, ou désinstaller Rétrocade pour supprimer les données locales.
+    </p>
+  </main>
+
+  <footer>
+    Rétrocade · Politique de confidentialité · 31 octobre 2026
+  </footer>
+</body>
+</html>

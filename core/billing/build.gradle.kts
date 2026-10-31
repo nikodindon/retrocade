@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.nikodindon.retrocade.core.billing"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24

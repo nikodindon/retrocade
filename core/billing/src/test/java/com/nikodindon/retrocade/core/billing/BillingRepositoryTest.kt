@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BillingRepositoryTest {
-    private val ids = BillingProductIds("monthly", "lifetime")
+    private val ids = BillingProductIds("lifetime")
 
     @Test
     fun `no purchase becomes free and is cached`() = runTest {
@@ -29,35 +29,6 @@ class BillingRepositoryTest {
         assertEquals(PremiumState.Free, repository.premiumState.value)
         assertEquals("FREE", cache.value?.type)
         assertTrue(repository.initialized.value)
-    }
-
-    @Test
-    fun `monthly purchase becomes monthly premium`() = runTest {
-        val gateway = FakeGateway(
-            purchases = listOf(purchase("monthly", acknowledged = true)),
-        )
-        val repository = repository(gateway, FakeCache(), this)
-
-        repository.initialize()
-        advanceUntilIdle()
-
-        assertEquals(PremiumState.Premium(PremiumType.MONTHLY), repository.premiumState.value)
-    }
-
-    @Test
-    fun `lifetime wins over monthly`() = runTest {
-        val gateway = FakeGateway(
-            purchases = listOf(
-                purchase("monthly", acknowledged = true),
-                purchase("lifetime", acknowledged = true),
-            ),
-        )
-        val repository = repository(gateway, FakeCache(), this)
-
-        repository.initialize()
-        advanceUntilIdle()
-
-        assertEquals(PremiumState.Premium(PremiumType.LIFETIME), repository.premiumState.value)
     }
 
     @Test
@@ -105,7 +76,7 @@ class BillingRepositoryTest {
     @Test
     fun `query failure keeps the cached state`() = runTest {
         val cache = FakeCache(
-            CachedPremium(PremiumType.MONTHLY.name, cachedAtEpochMillis = 123L),
+            CachedPremium(PremiumType.LIFETIME.name, cachedAtEpochMillis = 123L),
         )
         val gateway = FakeGateway(queryFails = true)
         val repository = repository(gateway, cache, this)
@@ -113,13 +84,20 @@ class BillingRepositoryTest {
         repository.initialize()
         advanceUntilIdle()
 
-        assertEquals(PremiumState.Premium(PremiumType.MONTHLY), repository.premiumState.value)
+        assertEquals(PremiumState.Premium(PremiumType.LIFETIME), repository.premiumState.value)
+    }
+
+    @Test
+    fun `refresh reports a network or query failure`() = runTest {
+        val repository = repository(FakeGateway(queryFails = true), FakeCache(), this)
+
+        assertFalse(repository.refreshPurchases())
     }
 
     @Test
     fun `restore drops premium when Play reports no purchases`() = runTest {
         val cache = FakeCache(
-            CachedPremium(PremiumType.MONTHLY.name, cachedAtEpochMillis = 123L),
+            CachedPremium(PremiumType.LIFETIME.name, cachedAtEpochMillis = 123L),
         )
         val gateway = FakeGateway()
         val repository = repository(gateway, cache, this)
@@ -133,11 +111,21 @@ class BillingRepositoryTest {
     }
 
     @Test
+    fun `legacy monthly cache never grants premium`() = runTest {
+        val cache = FakeCache(CachedPremium("MONTHLY", cachedAtEpochMillis = 123L))
+        val repository = repository(FakeGateway(), cache, this)
+
+        repository.initialize()
+        advanceUntilIdle()
+
+        assertEquals(PremiumState.Free, repository.premiumState.value)
+    }
+
+    @Test
     fun `products are loaded for the paywall`() = runTest {
         val gateway = FakeGateway(
             products = listOf(
-                BillingProduct("monthly", BillingProductType.MONTHLY, "Mensuel", "2,99 €", "offer"),
-                BillingProduct("lifetime", BillingProductType.LIFETIME, "À vie", "19,99 €", null),
+                BillingProduct("lifetime", BillingProductType.LIFETIME, "À vie", "19,99 €"),
             ),
         )
         val repository = repository(gateway, FakeCache(), this)
@@ -145,7 +133,7 @@ class BillingRepositoryTest {
         repository.initialize()
         advanceUntilIdle()
 
-        assertEquals(2, repository.products.value.size)
+        assertEquals(1, repository.products.value.size)
         assertEquals("19,99 €", repository.products.value.last().formattedPrice)
     }
 

@@ -34,8 +34,11 @@ class SettingsScreenTest {
                     premium = PremiumState.Free,
                     restoreMessage = null,
                     scoresMessage = null,
+                    privacyMessage = null,
                     onBack = {},
                     onStore = {},
+                    onPrivacyOptions = {},
+                    onPrivacyPolicy = {},
                     actions = SettingsActions(
                         setMusicEnabled = { enabled ->
                             settings = settings.copy(musicEnabled = enabled)
@@ -60,8 +63,11 @@ class SettingsScreenTest {
                     premium = PremiumState.Free,
                     restoreMessage = null,
                     scoresMessage = null,
+                    privacyMessage = null,
                     onBack = {},
                     onStore = {},
+                    onPrivacyOptions = {},
+                    onPrivacyPolicy = {},
                     actions = SettingsActions(
                         resetScores = { resetCalled = true },
                     ),

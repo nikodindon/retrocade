@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 11 and below. Settings and scores may be restored; the Premium cache and
+  advertising state must never be restored. The entitlement is re-verified with
+  Google Play Billing at startup.
+-->
+<full-backup-content>
+    <exclude domain="file" path="datastore/premium.preferences_pb" />
+    <exclude domain="sharedpref" path="." />
+</full-backup-content>
